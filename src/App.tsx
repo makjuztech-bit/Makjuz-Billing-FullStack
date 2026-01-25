@@ -15,6 +15,7 @@ import Login from "./pages/Login";
 import SetupWizard from "./pages/SetupWizard";
 import Dashboard from "./pages/Dashboard";
 import Billing from "./pages/Billing";
+import SareeMaster from "./pages/SareeMaster";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,7 +53,7 @@ const AppRoutes = () => {
         <Route path="/hold-bills" element={<Dashboard />} />
         <Route path="/customers" element={<Dashboard />} />
         <Route path="/dues" element={<Dashboard />} />
-        <Route path="/products" element={<Dashboard />} />
+        <Route path="/products" element={<SareeMaster />} />
         <Route path="/inventory" element={<Dashboard />} />
         <Route path="/stock-adjustment" element={<Dashboard />} />
         <Route path="/purchase" element={<Dashboard />} />
