@@ -16,6 +16,25 @@ import SetupWizard from "./pages/SetupWizard";
 import Dashboard from "./pages/Dashboard";
 import Billing from "./pages/Billing";
 import SareeMaster from "./pages/SareeMaster";
+import BillHistory from "./pages/BillHistory";
+import HoldBill from "./pages/HoldBill";
+import CustomerManagement from "./pages/CustomerManagement";
+import Inventory from "./pages/Inventory";
+import StockAdjustment from "./pages/StockAdjustment";
+import PurchaseEntry from "./pages/PurchaseEntry";
+import SupplierManagement from "./pages/SupplierManagement";
+import PurchaseReturn from "./pages/PurchaseReturn";
+import ReturnsExchange from "./pages/ReturnsExchange";
+import AlterationService from "./pages/AlterationService";
+import OrderBooking from "./pages/OrderBooking";
+import DueManagement from "./pages/DueManagement";
+import Expenses from "./pages/Expenses";
+import StaffManagement from "./pages/StaffManagement";
+import Reports from "./pages/Reports";
+import GstReports from "./pages/GstReports";
+import WhatsappMessenger from "./pages/WhatsappMessenger";
+import Settings from "./pages/Settings";
+import AdminCustomization from "./pages/AdminCustomization";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -23,11 +42,11 @@ const queryClient = new QueryClient();
 // Protected Route Wrapper
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
-  
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
-  
+
   return <>{children}</>;
 };
 
@@ -49,28 +68,26 @@ const AppRoutes = () => {
       >
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/billing" element={<Billing />} />
-        <Route path="/bill-history" element={<Dashboard />} />
-        <Route path="/hold-bills" element={<Dashboard />} />
-        <Route path="/customers" element={<Dashboard />} />
-        <Route path="/dues" element={<Dashboard />} />
+        <Route path="/bill-history" element={<BillHistory />} />
+        <Route path="/hold-bills" element={<HoldBill />} />
+        <Route path="/customers" element={<CustomerManagement />} />
+        <Route path="/dues" element={<DueManagement />} />
         <Route path="/products" element={<SareeMaster />} />
-        <Route path="/inventory" element={<Dashboard />} />
-        <Route path="/stock-adjustment" element={<Dashboard />} />
-        <Route path="/purchase" element={<Dashboard />} />
-        <Route path="/suppliers" element={<Dashboard />} />
-        <Route path="/purchase-return" element={<Dashboard />} />
-        <Route path="/returns" element={<Dashboard />} />
-        <Route path="/alterations" element={<Dashboard />} />
-        <Route path="/orders" element={<Dashboard />} />
-        <Route path="/expenses" element={<Dashboard />} />
-        <Route path="/staff" element={<Dashboard />} />
-        <Route path="/reports" element={<Dashboard />} />
-        <Route path="/gst-reports" element={<Dashboard />} />
-        <Route path="/whatsapp" element={<Dashboard />} />
-        <Route path="/settings" element={<Dashboard />} />
-        <Route path="/users" element={<Dashboard />} />
-        <Route path="/backup" element={<Dashboard />} />
-        <Route path="/customize" element={<Dashboard />} />
+        <Route path="/inventory" element={<Inventory />} />
+        <Route path="/stock-adjustment" element={<StockAdjustment />} />
+        <Route path="/purchase" element={<PurchaseEntry />} />
+        <Route path="/suppliers" element={<SupplierManagement />} />
+        <Route path="/purchase-return" element={<PurchaseReturn />} />
+        <Route path="/returns" element={<ReturnsExchange />} />
+        <Route path="/alterations" element={<AlterationService />} />
+        <Route path="/orders" element={<OrderBooking />} />
+        <Route path="/expenses" element={<Expenses />} />
+        <Route path="/staff" element={<StaffManagement />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/gst-reports" element={<GstReports />} />
+        <Route path="/whatsapp" element={<WhatsappMessenger />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/admin-customization" element={<AdminCustomization />} />
       </Route>
 
       {/* 404 */}
