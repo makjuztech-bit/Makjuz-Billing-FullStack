@@ -30,6 +30,7 @@ import {
 import { toast } from 'sonner';
 
 import { useData } from '@/contexts/DataContext';
+import { API_URL } from '@/lib/config';
 
 const PurchaseReturn: React.FC = () => {
     const { suppliers, purchases } = useData();
@@ -92,7 +93,7 @@ const PurchaseReturn: React.FC = () => {
         const purchase = purchases.find(p => p.billNo.toLowerCase() === purchaseBill.toLowerCase());
 
         try {
-            const res = await fetch('http://localhost:5000/api/purchases/return', {
+            const res = await fetch(`${API_URL}/purchases/return`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

@@ -38,6 +38,7 @@ import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/contexts/AuthContext';
+import { API_URL } from '@/lib/config';
 
 interface BillItem {
     barcode: string;
@@ -79,7 +80,7 @@ const ReturnsExchange: React.FC = () => {
         if (!searchQuery) return;
         setIsSearching(true);
         try {
-            const res = await fetch(`http://localhost:5000/api/bills/search?query=${searchQuery}`);
+            const res = await fetch(`${API_URL}/bills/search?query=${searchQuery}`);
             const data = await res.json();
 
             if (data.length > 0) {
@@ -162,7 +163,7 @@ const ReturnsExchange: React.FC = () => {
 
         setProcessing(true);
         try {
-            const response = await fetch('http://localhost:5000/api/returns', {
+            const response = await fetch(`${API_URL}/returns`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

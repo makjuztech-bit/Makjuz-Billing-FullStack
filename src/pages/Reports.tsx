@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { API_URL } from '@/lib/config';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -58,8 +59,8 @@ const Reports: React.FC = () => {
             try {
                 setLoading(true);
                 const [summaryRes, detailedRes] = await Promise.all([
-                    fetch('http://localhost:5000/api/reports/summary'),
-                    fetch('http://localhost:5000/api/reports/detailed')
+                    fetch(`${API_URL}/reports/summary`),
+                    fetch(`${API_URL}/reports/detailed`)
                 ]);
 
                 if (summaryRes.ok && detailedRes.ok) {

@@ -47,6 +47,7 @@ import {
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { API_URL } from '@/lib/config';
 
 interface Customer {
     id: string; // _id from backend mapped to id
@@ -81,7 +82,7 @@ const CustomerManagement: React.FC = () => {
     const fetchCustomers = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5000/api/customers');
+            const response = await fetch(`${API_URL}/customers`);
             if (response.ok) {
                 const data = await response.json();
                 setCustomers(data);
@@ -104,8 +105,8 @@ const CustomerManagement: React.FC = () => {
 
         try {
             const url = editingId
-                ? `http://localhost:5000/api/customers/${editingId}`
-                : 'http://localhost:5000/api/customers';
+                ? `${API_URL}/customers/${editingId}`
+                : `${API_URL}/customers`;
 
             const method = editingId ? 'PUT' : 'POST';
 

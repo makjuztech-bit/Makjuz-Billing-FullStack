@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Store, Eye, EyeOff, Lock, User, Building2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { API_URL } from '@/lib/config';
 import { LanguageSwitch } from '@/components/layout/LanguageSwitch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -76,7 +77,7 @@ export const Login: React.FC = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/reset-password', {
+      const response = await fetch(`${API_URL}/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(resetForm)

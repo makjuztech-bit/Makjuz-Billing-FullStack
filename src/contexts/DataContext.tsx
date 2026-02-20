@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { toast } from 'sonner';
 import { Saree, Supplier, AdjustmentItem, Purchase, AlterationJob, Order, Staff, Bill } from '@/types';
+import { API_URL } from '@/lib/config';
 
 interface DataContextType {
     sarees: Saree[];
@@ -41,7 +42,6 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [bills, setBills] = useState<Bill[]>([]);
     const [settings, setSettings] = useState<any>(null);
 
-    const API_URL = 'http://localhost:5000/api';
 
     const fetchData = async () => {
         try {

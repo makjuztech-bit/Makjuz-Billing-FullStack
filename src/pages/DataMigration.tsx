@@ -15,6 +15,7 @@ import {
     ShieldAlert
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { API_URL } from '@/lib/config';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export const DataMigration: React.FC = () => {
@@ -27,7 +28,7 @@ export const DataMigration: React.FC = () => {
     const handleExport = async () => {
         try {
             setIsExporting(true);
-            const response = await fetch(`http://localhost:5000/api/migration/export/${module}`);
+            const response = await fetch(`${API_URL}/migration/export/${module}`);
 
             if (!response.ok) throw new Error('Export failed');
 
@@ -52,7 +53,7 @@ export const DataMigration: React.FC = () => {
 
     const handleDownloadTemplate = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/api/migration/template/${module}`);
+            const response = await fetch(`${API_URL}/migration/template/${module}`);
             if (!response.ok) throw new Error('Template download failed');
 
             const blob = await response.blob();
@@ -83,7 +84,7 @@ export const DataMigration: React.FC = () => {
             const formData = new FormData();
             formData.append('file', file);
 
-            const response = await fetch('http://localhost:5000/api/migration/import', {
+            const response = await fetch(`${API_URL}/migration/import`, {
                 method: 'POST',
                 body: formData,
             });

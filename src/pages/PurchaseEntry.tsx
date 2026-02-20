@@ -43,6 +43,7 @@ import {
 import { useData } from '@/contexts/DataContext';
 import { PurchaseItem, Purchase } from '@/types';
 import { useEffect } from 'react';
+import { API_URL } from '@/lib/config';
 import { toast } from 'sonner';
 
 const PurchaseEntry: React.FC = () => {
@@ -125,7 +126,7 @@ const PurchaseEntry: React.FC = () => {
     const fetchHistory = async () => {
         setIsRefreshing(true);
         try {
-            const res = await fetch('http://localhost:5000/api/purchases');
+            const res = await fetch(`${API_URL}/purchases`);
             const data = await res.json();
             setPurchaseHistory(data);
         } catch (error) {
@@ -160,7 +161,7 @@ const PurchaseEntry: React.FC = () => {
         };
 
         try {
-            const res = await fetch('http://localhost:5000/api/purchases', {
+            const res = await fetch(`${API_URL}/purchases`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newPurchase)
@@ -183,7 +184,7 @@ const PurchaseEntry: React.FC = () => {
 
     const handleUpdatePayment = async (purchaseId: string, amount: number, method: string) => {
         try {
-            const res = await fetch(`http://localhost:5000/api/purchases/${purchaseId}/payment`, {
+            const res = await fetch(`${API_URL}/purchases/${purchaseId}/payment`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ amount, method })

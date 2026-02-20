@@ -27,6 +27,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { toast } from 'sonner';
+import { API_URL } from '@/lib/config';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -66,7 +67,7 @@ const Expenses: React.FC = () => {
     const fetchExpenses = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5000/api/expenses');
+            const response = await fetch(`${API_URL}/expenses`);
             if (response.ok) {
                 const data = await response.json();
                 setExpenses(data);
@@ -85,7 +86,7 @@ const Expenses: React.FC = () => {
         if (!amount) return;
 
         try {
-            const response = await fetch('http://localhost:5000/api/expenses', {
+            const response = await fetch(`${API_URL}/expenses`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -123,7 +124,7 @@ const Expenses: React.FC = () => {
         const id = deleteId;
 
         try {
-            const response = await fetch(`http://localhost:5000/api/expenses/${id}`, {
+            const response = await fetch(`${API_URL}/expenses/${id}`, {
                 method: 'DELETE',
             });
 

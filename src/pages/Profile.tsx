@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { API_URL } from '@/lib/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,7 +27,7 @@ const Profile: React.FC = () => {
 
         setIsUpdatingProfile(true);
         try {
-            const response = await fetch('http://localhost:5000/api/auth/update', {
+            const response = await fetch(`${API_URL}/auth/update`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -64,7 +65,7 @@ const Profile: React.FC = () => {
 
         setIsLoading(true);
         try {
-            const response = await fetch('http://localhost:5000/api/auth/update', {
+            const response = await fetch(`${API_URL}/auth/update`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

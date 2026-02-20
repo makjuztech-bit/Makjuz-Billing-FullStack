@@ -23,6 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '@/lib/config';
 
 interface StatCard {
   titleKey: string;
@@ -75,7 +76,7 @@ export const Dashboard: React.FC = () => {
   React.useEffect(() => {
     const fetchBestSelling = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/reports/bestselling');
+        const res = await fetch(`${API_URL}/reports/bestselling`);
         if (res.ok) {
           setBestSelling(await res.json());
         }

@@ -18,6 +18,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { toast } from 'sonner';
+import { API_URL } from '@/lib/config';
 
 interface HsnItem {
     code: string;
@@ -45,7 +46,7 @@ const GstReports: React.FC = () => {
     const fetchGstData = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:5000/api/reports/gst');
+            const response = await fetch(`${API_URL}/reports/gst`);
             if (response.ok) {
                 const result = await response.json();
                 setData(result);

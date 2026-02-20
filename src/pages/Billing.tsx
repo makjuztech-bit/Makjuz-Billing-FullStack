@@ -31,6 +31,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
@@ -56,6 +57,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Saree } from '@/types';
+import { API_URL } from '@/lib/config';
 
 interface BillItem {
   id: string;
@@ -133,7 +135,7 @@ export const Billing: React.FC = () => {
     const fetchCustomer = async () => {
       if (customerMobile.length === 10) {
         try {
-          const res = await fetch(`http://localhost:5000/api/customers/search?query=${customerMobile}`);
+          const res = await fetch(`${API_URL}/customers/search?query=${customerMobile}`);
           const data = await res.json();
           if (data && data.length > 0) {
             const customer = data[0];
@@ -170,6 +172,43 @@ export const Billing: React.FC = () => {
     if (barcodeInputRef.current) {
       barcodeInputRef.current.focus();
     }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // F1: Focus Barcode
+      if (e.key === 'F1') {
+        e.preventDefault();
+        barcodeInputRef.current?.focus();
+      }
+      // F2: Save & Print
+      if (e.key === 'F2') {
+        e.preventDefault();
+        handleSaveBill(true);
+      }
+      // F3: Save Only
+      if (e.key === 'F3') {
+        e.preventDefault();
+        handleSaveBill(false);
+      }
+      // F4: Hold Bill
+      if (e.key === 'F4') {
+        e.preventDefault();
+        handleHoldBill();
+      }
+      // F10: New Bill
+      if (e.key === 'F10') {
+        e.preventDefault();
+        setItems([]);
+        setCustomerName('');
+        setCustomerMobile('');
+        setCustomerPlace('');
+        setDiscountPercent(0);
+        setPaymentMethod('cash');
+        toast.info('Form cleared for new bill');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const addItemToBill = (saree: Saree) => {
@@ -317,23 +356,32 @@ export const Billing: React.FC = () => {
       date: new Date().toISOString().split('T')[0]
     };
 
-    addBill(billData);
-    setLastBill(billData);
+    const saveProcess = async () => {
+      try {
+        await addBill(billData);
+        setLastBill(billData);
 
-    if (print) {
-      setIsPrintPreviewOpen(true);
-      toast.success('Bill saved! Opening print preview...');
-    } else {
-      toast.success('Bill saved successfully!');
-    }
+        if (print) {
+          setIsPrintPreviewOpen(true);
+          toast.success('Bill saved! Opening print preview...');
+        } else {
+          toast.success('Bill saved successfully!');
+        }
 
-    // Clear form
-    setItems([]);
-    setCustomerName('');
-    setCustomerMobile('');
-    setCustomerPlace('');
-    setDiscountPercent(0);
-    setPaymentMethod('cash');
+        // Clear form
+        setItems([]);
+        setCustomerName('');
+        setCustomerMobile('');
+        setCustomerPlace('');
+        setDiscountPercent(0);
+        setPaymentMethod('cash');
+      } catch (error) {
+        console.error("Save failed:", error);
+        toast.error("Failed to save bill. Please try again.");
+      }
+    };
+
+    saveProcess();
   };
 
   const handleSavePrint = () => handleSaveBill(true);

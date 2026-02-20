@@ -25,6 +25,7 @@ import ReactBarcode from 'react-barcode';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useData } from '@/contexts/DataContext';
 import { Saree } from '@/types';
+import { API_URL } from '@/lib/config';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -381,7 +382,7 @@ export const SareeMaster: React.FC = () => {
     uploadData.append('image', file);
 
     try {
-      const res = await fetch('http://localhost:5000/api/upload', {
+      const res = await fetch(`${API_URL}/upload`, {
         method: 'POST',
         body: uploadData,
       });

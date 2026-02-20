@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Calendar as CalendarIcon, Download, FileSpreadsheet, FileText, Database } from 'lucide-react';
 import { toast } from 'sonner';
+import { API_URL } from '@/lib/config';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -23,7 +24,7 @@ export const BackupRestore: React.FC = () => {
     const fetchBackupData = async () => {
         try {
             setLoading(true);
-            const response = await fetch(`http://localhost:5000/api/reports/backup?startDate=${startDate}&endDate=${endDate}`);
+            const response = await fetch(`${API_URL}/reports/backup?startDate=${startDate}&endDate=${endDate}`);
             if (!response.ok) throw new Error('Failed to fetch backup data');
             return await response.json();
         } catch (error) {
