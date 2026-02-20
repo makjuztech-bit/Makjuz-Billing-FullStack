@@ -27,6 +27,7 @@ import {
   Palette,
   ChevronDown,
   Store,
+  Barcode,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
@@ -80,9 +81,10 @@ const navGroups: NavGroup[] = [
   {
     label: 'Inventory',
     items: [
-      { title: 'Saree Master', titleKey: 'nav.products', url: '/products', icon: Package },
+      { title: 'Product Master', titleKey: 'nav.products', url: '/products', icon: Package },
       { title: 'Stock List', titleKey: 'nav.inventory', url: '/inventory', icon: Warehouse },
       { title: 'Stock Adjustment', titleKey: 'nav.stockAdjust', url: '/stock-adjustment', icon: Settings2 },
+      { title: 'Barcode Generator', titleKey: 'nav.barcode', url: '/barcode-generator', icon: Barcode },
     ],
   },
   {
@@ -120,9 +122,10 @@ const navGroups: NavGroup[] = [
     items: [
       { title: 'WhatsApp', titleKey: 'nav.whatsapp', url: '/whatsapp', icon: MessageSquare },
       { title: 'Settings', titleKey: 'nav.settings', url: '/settings', icon: Settings },
-      { title: 'Users & Roles', titleKey: 'nav.users', url: '/users', icon: Shield },
-      { title: 'Backup', titleKey: 'nav.backup', url: '/backup', icon: Database },
-      { title: 'Customization', titleKey: 'nav.customize', url: '/customize', icon: Palette },
+      { title: 'Users & Roles', titleKey: 'nav.users', url: '/settings', icon: Shield },
+      { title: 'Data Backup', titleKey: 'nav.backup', url: '/backup', icon: Database },
+      { title: 'Smart Migration', titleKey: 'nav.migration', url: '/migration', icon: RotateCcw },
+      { title: 'Customization', titleKey: 'nav.customize', url: '/admin-customization', icon: Palette },
     ],
   },
 ];
@@ -145,7 +148,7 @@ export const AppSidebar: React.FC = () => {
           {!collapsed && (
             <div className="flex flex-col">
               <span className="font-display text-lg font-semibold text-sidebar-foreground">
-                Silk Saree
+                vv collection
               </span>
               <span className="text-xs text-sidebar-foreground/70">POS System</span>
             </div>
@@ -169,7 +172,7 @@ export const AppSidebar: React.FC = () => {
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {group.items.map((item) => (
-                      <SidebarMenuItem key={item.url}>
+                      <SidebarMenuItem key={item.titleKey}>
                         <SidebarMenuButton
                           asChild
                           isActive={isActive(item.url)}

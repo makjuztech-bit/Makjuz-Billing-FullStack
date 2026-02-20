@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { DataProvider } from "@/contexts/DataContext";
 
 // Layouts
 import { MainLayout } from "@/components/layout/MainLayout";
@@ -35,7 +36,11 @@ import GstReports from "./pages/GstReports";
 import WhatsappMessenger from "./pages/WhatsappMessenger";
 import Settings from "./pages/Settings";
 import AdminCustomization from "./pages/AdminCustomization";
+import BarcodeGenerator from "./pages/BarcodeGenerator";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import { BackupRestore } from "./pages/BackupRestore";
+import { DataMigration } from "./pages/DataMigration";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +93,10 @@ const AppRoutes = () => {
         <Route path="/whatsapp" element={<WhatsappMessenger />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/admin-customization" element={<AdminCustomization />} />
+        <Route path="/barcode-generator" element={<BarcodeGenerator />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/backup" element={<BackupRestore />} />
+        <Route path="/migration" element={<DataMigration />} />
       </Route>
 
       {/* 404 */}
@@ -100,13 +109,15 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
       <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
-        </TooltipProvider>
+        <DataProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
+          </TooltipProvider>
+        </DataProvider>
       </AuthProvider>
     </LanguageProvider>
   </QueryClientProvider>

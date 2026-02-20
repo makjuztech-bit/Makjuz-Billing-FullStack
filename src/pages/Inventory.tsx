@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     Search,
     Filter,
@@ -38,88 +39,63 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
-interface InventoryItem {
-    barcode: string;
-    name: string;
-    category: string;
-    costPrice: number;
-    sellingPrice: number;
-    status: 'Available' | 'Sold' | 'Damaged' | 'Held';
-    rackLocation: string;
-    addedDate: string;
-    supplier: string;
-}
-
-const mockInventory: InventoryItem[] = [
-    {
-        barcode: 'KS-2024-001',
-        name: 'Kanchipuram Red Bridal',
-        category: 'Silk',
-        costPrice: 15000,
-        sellingPrice: 22000,
-        status: 'Available',
-        rackLocation: 'A1-05',
-        addedDate: '2024-02-15',
-        supplier: 'Weaver Raman',
-    },
-    {
-        barcode: 'KS-2024-002',
-        name: 'Soft Silk Blue Motif',
-        category: 'Soft Silk',
-        costPrice: 5000,
-        sellingPrice: 7500,
-        status: 'Available',
-        rackLocation: 'B2-10',
-        addedDate: '2024-02-20',
-        supplier: 'Silk House TN',
-    },
-    {
-        barcode: 'CT-2024-105',
-        name: 'Cotton Daily Wear',
-        category: 'Cotton',
-        costPrice: 800,
-        sellingPrice: 1200,
-        status: 'Sold',
-        rackLocation: '-',
-        addedDate: '2024-01-10',
-        supplier: 'Coimbatore Cottons',
-    },
-    {
-        barcode: 'FC-2024-055',
-        name: 'Fancy Designer Saree',
-        category: 'Fancy',
-        costPrice: 2500,
-        sellingPrice: 4000,
-        status: 'Damaged',
-        rackLocation: 'D-Bin',
-        addedDate: '2024-03-01',
-        supplier: 'Mumbai Fashions',
-    },
-];
+import { useData } from '@/contexts/DataContext';
+import { Saree } from '@/types';
 
 const Inventory: React.FC = () => {
-    const [items, setItems] = useState<InventoryItem[]>(mockInventory);
+    const { sarees, updateSaree } = useData();
+    const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [filterCategory, setFilterCategory] = useState('all');
 
-    const handleMarkDamaged = (barcode: string) => {
-        toast.warning(`Marked ${barcode} as Damaged`);
-        setItems((prev) =>
-            prev.map((item) => (item.barcode === barcode ? { ...item, status: 'Damaged' } : item))
-        );
+    const [editingItem, setEditingItem] = useState<Saree | null>(null);
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [editForm, setEditForm] = useState<Partial<Saree>>({});
+
+    const handleMarkDamaged = async (id: string, barcode: string) => {
+        if (confirm(`Mark ${barcode} as Damaged? This will move it to damaged stock.`)) {
+            await updateSaree(id, { status: 'damaged' });
+            toast.success(`Marked ${barcode} as Damaged`);
+        }
     };
 
-    const handlePriceUpdate = (barcode: string) => {
-        toast.info(`Updating price for ${barcode}`);
+    const handleEditClick = (item: Saree) => {
+        setEditingItem(item);
+        setEditForm({
+            name: item.name,
+            category: item.category,
+            rackLocation: item.rackLocation,
+            purchasePrice: item.purchasePrice,
+            sellingPrice: item.sellingPrice,
+            mrp: item.mrp
+        });
+        setIsEditOpen(true);
+    };
+
+    const handleSaveEdit = async () => {
+        if (editingItem && editingItem.id) {
+            await updateSaree(editingItem.id, editForm);
+            setIsEditOpen(false);
+            setEditingItem(null);
+            toast.success('Stock details updated');
+        }
     };
 
     const handleTransfer = (barcode: string) => {
-        toast.success(`Initiated transfer for ${barcode}`);
+        toast.info(`Transfer feature pending for ${barcode}`);
     };
 
-    const filteredItems = items.filter((item) => {
+    const filteredItems = sarees.filter((item) => {
         const matchesSearch =
             item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             item.barcode.toLowerCase().includes(searchTerm.toLowerCase());
@@ -135,6 +111,10 @@ const Inventory: React.FC = () => {
                     <p className="text-muted-foreground">Manage stock, prices, and status.</p>
                 </div>
                 <div className="flex items-center gap-2">
+                    <Button variant="outline" onClick={() => navigate('/billing')}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        New Bill
+                    </Button>
                     <Button variant="outline">
                         <Printer className="mr-2 h-4 w-4" />
                         Print Tags
@@ -143,7 +123,7 @@ const Inventory: React.FC = () => {
                         <Download className="mr-2 h-4 w-4" />
                         Export
                     </Button>
-                    <Button>
+                    <Button onClick={() => navigate('/products')}>
                         <Plus className="mr-2 h-4 w-4" />
                         Add Stock
                     </Button>
@@ -154,8 +134,8 @@ const Inventory: React.FC = () => {
                 <CardHeader className="pb-3">
                     <CardTitle>Stock List</CardTitle>
                     <CardDescription>
-                        Total Items: {filteredItems.length} | Value: ₹
-                        {filteredItems.reduce((sum, item) => sum + item.sellingPrice, 0).toLocaleString()}
+                        Total Items: {filteredItems.reduce((sum, item) => sum + (item.stockQty || 0), 0)} | Value: ₹
+                        {filteredItems.reduce((sum, item) => sum + ((item.purchasePrice || 0) * (item.stockQty || 0)), 0).toLocaleString()}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -207,6 +187,7 @@ const Inventory: React.FC = () => {
                                     <TableHead className="hidden md:table-cell">Rack</TableHead>
                                     <TableHead className="text-right">Cost</TableHead>
                                     <TableHead className="text-right">Selling Price</TableHead>
+                                    <TableHead className="text-center">Stock</TableHead>
                                     <TableHead className="text-center">Status</TableHead>
                                     <TableHead className="w-[50px]"></TableHead>
                                 </TableRow>
@@ -223,18 +204,23 @@ const Inventory: React.FC = () => {
                                         </TableCell>
                                         <TableCell>{item.category}</TableCell>
                                         <TableCell className="hidden md:table-cell font-mono text-xs">{item.rackLocation}</TableCell>
-                                        <TableCell className="text-right text-muted-foreground">₹{item.costPrice.toLocaleString()}</TableCell>
+                                        <TableCell className="text-right text-muted-foreground">₹{item.purchasePrice.toLocaleString()}</TableCell>
                                         <TableCell className="text-right font-semibold">₹{item.sellingPrice.toLocaleString()}</TableCell>
+                                        <TableCell className="text-center">
+                                            <span className={`font-medium ${item.stockQty <= 2 ? 'text-destructive font-bold' : ''}`}>
+                                                {item.stockQty}
+                                            </span>
+                                        </TableCell>
                                         <TableCell className="text-center">
                                             <Badge
                                                 variant="outline"
                                                 className={`
-                          ${item.status === 'Available' ? 'bg-green-50 text-green-700 border-green-200' : ''}
-                          ${item.status === 'Sold' ? 'bg-blue-50 text-blue-700 border-blue-200' : ''}
-                          ${item.status === 'Damaged' ? 'bg-red-50 text-red-700 border-red-200' : ''}
+                          ${item.status === 'available' && item.stockQty > 0 ? 'bg-green-50 text-green-700 border-green-200' : ''}
+                          ${item.status === 'sold' || item.stockQty <= 0 ? 'bg-blue-50 text-blue-700 border-blue-200' : ''}
+                          ${item.status === 'damaged' ? 'bg-red-50 text-red-700 border-red-200' : ''}
                         `}
                                             >
-                                                {item.status}
+                                                {item.stockQty <= 0 ? 'Out of Stock' : (item.status === 'available' ? 'Available' : item.status.charAt(0).toUpperCase() + item.status.slice(1))}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
@@ -246,10 +232,10 @@ const Inventory: React.FC = () => {
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
                                                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem onClick={() => handlePriceUpdate(item.barcode)}>
+                                                    <DropdownMenuItem onClick={() => handleEditClick(item)}>
                                                         <Tag className="mr-2 h-4 w-4" /> Update Price
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => { }}>
+                                                    <DropdownMenuItem onClick={() => handleEditClick(item)}>
                                                         <Edit className="mr-2 h-4 w-4" /> Edit Details
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem onClick={() => handleTransfer(item.barcode)}>
@@ -258,7 +244,7 @@ const Inventory: React.FC = () => {
                                                     <DropdownMenuSeparator />
                                                     <DropdownMenuItem
                                                         className="text-destructive focus:text-destructive"
-                                                        onClick={() => handleMarkDamaged(item.barcode)}
+                                                        onClick={() => handleMarkDamaged(item.id || (item as any)._id, item.barcode)}
                                                     >
                                                         <AlertTriangle className="mr-2 h-4 w-4" /> Mark Damaged
                                                     </DropdownMenuItem>
@@ -272,7 +258,84 @@ const Inventory: React.FC = () => {
                     </div>
                 </CardContent>
             </Card>
-        </div>
+
+            <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+                <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                        <DialogTitle>Edit Stock Details</DialogTitle>
+                        <DialogDescription>
+                            Update product information for {editingItem?.barcode}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                            <label className="text-sm font-medium">Product Name</label>
+                            <Input
+                                value={editForm.name ?? ''}
+                                onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                                <label className="text-sm font-medium">Category</label>
+                                <Select
+                                    value={editForm.category ?? ''}
+                                    onValueChange={val => setEditForm({ ...editForm, category: val })}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Silk">Silk</SelectItem>
+                                        <SelectItem value="Soft Silk">Soft Silk</SelectItem>
+                                        <SelectItem value="Cotton">Cotton</SelectItem>
+                                        <SelectItem value="Fancy">Fancy</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="grid gap-2">
+                                <label className="text-sm font-medium">Rack / Location</label>
+                                <Input
+                                    value={editForm.rackLocation ?? ''}
+                                    onChange={e => setEditForm({ ...editForm, rackLocation: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                            <div className="grid gap-2">
+                                <label className="text-sm font-medium">Cost Price</label>
+                                <Input
+                                    type="number"
+                                    value={editForm.purchasePrice || 0}
+                                    onChange={e => setEditForm({ ...editForm, purchasePrice: Number(e.target.value) })}
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <label className="text-sm font-medium">MRP</label>
+                                <Input
+                                    type="number"
+                                    value={editForm.mrp || 0}
+                                    onChange={e => setEditForm({ ...editForm, mrp: Number(e.target.value) })}
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <label className="text-sm font-medium">Selling Price</label>
+                                <Input
+                                    type="number"
+                                    className="border-green-300 bg-green-50"
+                                    value={editForm.sellingPrice || 0}
+                                    onChange={e => setEditForm({ ...editForm, sellingPrice: Number(e.target.value) })}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+                        <Button onClick={handleSaveEdit}>Save Changes</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div >
     );
 };
 

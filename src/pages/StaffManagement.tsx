@@ -19,25 +19,54 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
+import { useData } from '@/contexts/DataContext';
+import { Staff } from '@/types';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogFooter
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
 
-interface Staff {
-    id: string;
-    name: string;
-    role: string;
-    commissionType: 'Percentage' | 'Fixed';
-    commissionValue: number;
-    active: boolean;
-    salesThisMonth: number;
-}
-
-const mockStaff: Staff[] = [
-    { id: '1', name: 'Ramesh', role: 'Salesman', commissionType: 'Percentage', commissionValue: 1, active: true, salesThisMonth: 450000 },
-    { id: '2', name: 'Suresh', role: 'Salesman', commissionType: 'Fixed', commissionValue: 50, active: true, salesThisMonth: 320000 },
-    { id: '3', name: 'Meena', role: 'Cashier', commissionType: 'Percentage', commissionValue: 0, active: true, salesThisMonth: 0 },
-];
+// Removed mock data as it is now in Context
 
 const StaffManagement: React.FC = () => {
-    const [staffList, setStaffList] = useState<Staff[]>(mockStaff);
+    const { staffList, addStaff } = useData();
+    const [isAddOpen, setIsAddOpen] = useState(false);
+
+    // Add Form State
+    const [name, setName] = useState('');
+    const [role, setRole] = useState('Salesman');
+    const [commissionType, setCommissionType] = useState<'Percentage' | 'Fixed'>('Percentage');
+    const [commissionValue, setCommissionValue] = useState(0);
+
+    const handleSave = () => {
+        if (!name) {
+            toast.error('Please enter employee name');
+            return;
+        }
+
+        const newStaff: Staff = {
+            id: `EMP-${Date.now()}`,
+            name,
+            role,
+            commissionType,
+            commissionValue,
+            active: true,
+            salesThisMonth: 0
+        };
+        addStaff(newStaff);
+        setIsAddOpen(false);
+        toast.success(`Employee ${name} added successfully`);
+        // Reset
+        setName('');
+        setCommissionValue(0);
+    };
 
     return (
         <div className="flex flex-col gap-6">
@@ -46,9 +75,60 @@ const StaffManagement: React.FC = () => {
                     <h1 className="text-3xl font-bold tracking-tight font-display text-primary">Staff & Commissions</h1>
                     <p className="text-muted-foreground">Manage employees, roles and sales incentives.</p>
                 </div>
-                <Button>
-                    <UserPlus className="mr-2 h-4 w-4" /> Add Employee
-                </Button>
+                <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+                    <DialogTrigger asChild>
+                        <Button>
+                            <UserPlus className="mr-2 h-4 w-4" /> Add Employee
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Add New Employee</DialogTitle>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="grid gap-2">
+                                <Label>Employee Name</Label>
+                                <Input value={name} onChange={e => setName(e.target.value)} />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label>Role</Label>
+                                <Select value={role} onValueChange={setRole}>
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Salesman">Salesman</SelectItem>
+                                        <SelectItem value="Cashier">Cashier</SelectItem>
+                                        <SelectItem value="Manager">Manager</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label>Commission Type</Label>
+                                <Select value={commissionType} onValueChange={(v: 'Percentage' | 'Fixed') => setCommissionType(v)}>
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Percentage">Percentage (%)</SelectItem>
+                                        <SelectItem value="Fixed">Fixed Amount / Item</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="grid gap-2">
+                                <Label>Commission Value</Label>
+                                <Input
+                                    type="number"
+                                    value={commissionValue}
+                                    onChange={e => setCommissionValue(Number(e.target.value))}
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button onClick={handleSave}>Save Employee</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -57,15 +137,17 @@ const StaffManagement: React.FC = () => {
                         <CardTitle className="text-sm font-medium">Total Sales Staff</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">12</div>
+                        <div className="text-2xl font-bold">{staffList.filter(s => s.role === 'Salesman').length}</div>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium">Commissions Paid (This Month)</CardTitle>
+                        <CardTitle className="text-sm font-medium">Commissions Est. (This Month)</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₹24,500</div>
+                        <div className="text-2xl font-bold text-primary">
+                            ₹{staffList.reduce((sum, s) => sum + (s.commissionType === 'Percentage' ? (s.salesThisMonth * s.commissionValue / 100) : 0), 0).toLocaleString()}
+                        </div>
                     </CardContent>
                 </Card>
             </div>

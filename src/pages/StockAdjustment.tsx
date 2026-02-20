@@ -29,31 +29,32 @@ import {
 } from '@/components/ui/table';
 import { toast } from 'sonner';
 
-interface AdjustmentItem {
-    id: string;
-    barcode: string;
-    name: string;
-    currentStock: number;
-    adjustQty: number; // positive or negative
-    reason: string;
-}
+import { useData } from '@/contexts/DataContext';
+import { AdjustmentItem } from '@/types';
+
+// Using shared type instead of local interface
 
 const StockAdjustment: React.FC = () => {
+    const { sarees, addAdjustment } = useData();
     const [items, setItems] = useState<AdjustmentItem[]>([]);
     const [barcodeInput, setBarcodeInput] = useState('');
     const [selectedReason, setSelectedReason] = useState('damaged');
+    const [adjustQty, setAdjustQty] = useState(1);
 
     const handleAddItem = () => {
         if (!barcodeInput) return;
 
-        // Mock functionality
+        const product = sarees.find(s => s.barcode === barcodeInput || s.sareeCode === barcodeInput);
+
         const newItem: AdjustmentItem = {
             id: Math.random().toString(36).substr(2, 9),
             barcode: barcodeInput,
-            name: `Mock Item ${barcodeInput}`,
-            currentStock: 10,
-            adjustQty: -1,
+            name: product ? product.name : `Unknown Item (${barcodeInput})`,
+            currentStock: product ? product.stockQty : 0,
+            adjustQty: selectedReason === 'opening' || selectedReason === 'correction' ? adjustQty : -adjustQty, // Default negative for damaged/missing
             reason: selectedReason,
+            date: new Date().toISOString(),
+            status: 'pending'
         };
 
         setItems([...items, newItem]);
@@ -66,7 +67,10 @@ const StockAdjustment: React.FC = () => {
     };
 
     const handleSubmit = () => {
-        toast.success('Stock adjustment submitted for approval');
+        items.forEach(item => {
+            addAdjustment(item);
+        });
+        toast.success('Stock adjustment submitted successfully');
         setItems([]);
     };
 
@@ -115,6 +119,16 @@ const StockAdjustment: React.FC = () => {
                                         <Plus className="h-4 w-4" />
                                     </Button>
                                 </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Quantity Adjustment</label>
+                                <Input
+                                    type="number"
+                                    value={adjustQty}
+                                    onChange={e => setAdjustQty(Number(e.target.value))}
+                                />
+                                <p className="text-xs text-muted-foreground">Positive for finding/opening, Negative is calc automatically for damaged/missing</p>
                             </div>
 
                             <div className="rounded-lg bg-orange-50 p-4 border border-orange-100 text-sm text-orange-800 flex gap-2">

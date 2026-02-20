@@ -15,10 +15,11 @@ const translations: Record<string, Record<Language, string>> = {
   'nav.billHistory': { en: 'Bill History', ta: 'பில் வரலாறு' },
   'nav.holdBills': { en: 'Hold Bills', ta: 'நிறுத்தப்பட்ட பில்' },
   'nav.customers': { en: 'Customers', ta: 'வாடிக்கையாளர்கள்' },
-  'nav.products': { en: 'Saree Master', ta: 'சேலை மாஸ்டர்' },
+  'nav.products': { en: 'Product Master', ta: 'தயாரிப்பு மாஸ்டர்' },
   'nav.inventory': { en: 'Inventory', ta: 'கையிருப்பு' },
   'nav.stockAdjust': { en: 'Stock Adjustment', ta: 'கையிருப்பு சரிசெய்' },
   'nav.purchase': { en: 'Purchase Entry', ta: 'வாங்கல் பதிவு' },
+
   'nav.suppliers': { en: 'Suppliers', ta: 'சப்ளையர்கள்' },
   'nav.purchaseReturn': { en: 'Purchase Return', ta: 'வாங்கல் திரும்ப' },
   'nav.returns': { en: 'Returns/Exchange', ta: 'திரும்ப/மாற்று' },
@@ -33,8 +34,10 @@ const translations: Record<string, Record<Language, string>> = {
   'nav.settings': { en: 'Settings', ta: 'அமைப்புகள்' },
   'nav.users': { en: 'Users & Roles', ta: 'பயனர்கள்' },
   'nav.backup': { en: 'Backup', ta: 'காப்புப்பிரதி' },
+  'nav.migration': { en: 'Smart Migration', ta: 'டேட்டா மைக்ரேஷன்' },
   'nav.customize': { en: 'Customization', ta: 'தனிப்பயனாக்கம்' },
-  
+  'nav.barcode': { en: 'Barcode Generator', ta: 'பார்கோடு ஜெனரேட்டர்' },
+
   // Common
   'common.search': { en: 'Search', ta: 'தேடு' },
   'common.save': { en: 'Save', ta: 'சேமி' },
@@ -51,7 +54,7 @@ const translations: Record<string, Record<Language, string>> = {
   'common.actions': { en: 'Actions', ta: 'செயல்கள்' },
   'common.welcome': { en: 'Welcome', ta: 'வணக்கம்' },
   'common.logout': { en: 'Logout', ta: 'வெளியேறு' },
-  
+
   // Dashboard
   'dashboard.todaySales': { en: "Today's Sales", ta: 'இன்றைய விற்பனை' },
   'dashboard.todayBills': { en: "Today's Bills", ta: 'இன்றைய பில்கள்' },
@@ -64,7 +67,7 @@ const translations: Record<string, Record<Language, string>> = {
   'dashboard.stockValue': { en: 'Stock Value', ta: 'கையிருப்பு மதிப்பு' },
   'dashboard.lowStock': { en: 'Low Stock Alert', ta: 'குறைந்த கையிருப்பு' },
   'dashboard.bestSelling': { en: 'Best Selling', ta: 'அதிகம் விற்பனை' },
-  
+
   // Billing
   'billing.newBill': { en: 'New Bill', ta: 'புதிய பில்' },
   'billing.customer': { en: 'Customer', ta: 'வாடிக்கையாளர்' },
@@ -80,7 +83,7 @@ const translations: Record<string, Record<Language, string>> = {
   'billing.savePrint': { en: 'Save & Print', ta: 'சேமி & அச்சு' },
   'billing.holdBill': { en: 'Hold Bill', ta: 'பில் நிறுத்து' },
   'billing.whatsapp': { en: 'WhatsApp Invoice', ta: 'WhatsApp பில்' },
-  
+
   // Login
   'login.title': { en: 'Sign In', ta: 'உள்நுழை' },
   'login.username': { en: 'Username', ta: 'பயனர்பெயர்' },
@@ -88,9 +91,9 @@ const translations: Record<string, Record<Language, string>> = {
   'login.branch': { en: 'Select Branch', ta: 'கிளை தேர்வு' },
   'login.forgot': { en: 'Forgot Password?', ta: 'கடவுச்சொல் மறந்தது?' },
   'login.otp': { en: 'Login with OTP', ta: 'OTP உள்நுழைவு' },
-  
+
   // Setup
-  'setup.welcome': { en: 'Welcome to Silk Saree POS', ta: 'சில்க் சேலை POS வரவேற்பு' },
+  'setup.welcome': { en: 'Welcome to vv collection POS', ta: 'vv collection POS வரவேற்பு' },
   'setup.companyInfo': { en: 'Company Information', ta: 'நிறுவன தகவல்' },
   'setup.gstSettings': { en: 'GST Settings', ta: 'GST அமைப்புகள்' },
   'setup.billingSettings': { en: 'Billing Settings', ta: 'பில்லிங் அமைப்புகள்' },

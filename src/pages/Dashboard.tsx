@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useData } from '@/contexts/DataContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -32,87 +33,6 @@ interface StatCard {
   color: 'primary' | 'secondary' | 'success' | 'warning' | 'info' | 'destructive';
 }
 
-const stats: StatCard[] = [
-  {
-    titleKey: 'dashboard.todaySales',
-    value: '₹2,45,750',
-    subValue: '32 bills',
-    icon: TrendingUp,
-    trend: { value: '+12%', positive: true },
-    color: 'primary',
-  },
-  {
-    titleKey: 'dashboard.cashSales',
-    value: '₹1,25,000',
-    subValue: '18 transactions',
-    icon: Banknote,
-    color: 'success',
-  },
-  {
-    titleKey: 'dashboard.upiSales',
-    value: '₹85,250',
-    subValue: '10 transactions',
-    icon: Smartphone,
-    color: 'info',
-  },
-  {
-    titleKey: 'dashboard.cardSales',
-    value: '₹35,500',
-    subValue: '4 transactions',
-    icon: CreditCard,
-    color: 'secondary',
-  },
-  {
-    titleKey: 'dashboard.creditPending',
-    value: '₹45,000',
-    subValue: '8 customers',
-    icon: Clock,
-    color: 'warning',
-  },
-  {
-    titleKey: 'dashboard.returns',
-    value: '₹12,500',
-    subValue: '2 returns',
-    icon: RotateCcw,
-    color: 'destructive',
-  },
-  {
-    titleKey: 'dashboard.stockValue',
-    value: '₹45,80,000',
-    subValue: '1,250 sarees',
-    icon: Package,
-    color: 'primary',
-  },
-  {
-    titleKey: 'dashboard.profit',
-    value: '₹32,450',
-    subValue: '15.2% margin',
-    icon: TrendingUp,
-    trend: { value: '+8%', positive: true },
-    color: 'success',
-  },
-];
-
-const lowStockItems = [
-  { name: 'Kanchipuram Pure Silk - Maroon', stock: 2, threshold: 5 },
-  { name: 'Banarasi Silk - Golden', stock: 1, threshold: 3 },
-  { name: 'Mysore Silk - Green', stock: 3, threshold: 5 },
-];
-
-const recentBills = [
-  { id: 'INV-2024-0032', customer: 'Lakshmi Devi', amount: '₹15,500', time: '10 mins ago', status: 'Paid' },
-  { id: 'INV-2024-0031', customer: 'Meena Kumari', amount: '₹8,750', time: '25 mins ago', status: 'Paid' },
-  { id: 'INV-2024-0030', customer: 'Rajan Kumar', amount: '₹22,000', time: '1 hour ago', status: 'Credit' },
-  { id: 'INV-2024-0029', customer: 'Priya Sharma', amount: '₹12,350', time: '2 hours ago', status: 'Paid' },
-];
-
-const bestSelling = [
-  { name: 'Kanchipuram Silk', sales: 45, revenue: '₹8,50,000' },
-  { name: 'Banarasi Silk', sales: 32, revenue: '₹5,20,000' },
-  { name: 'Mysore Silk', sales: 28, revenue: '₹3,80,000' },
-  { name: 'Chanderi Silk', sales: 18, revenue: '₹2,40,000' },
-];
-
 const quickActions = [
   { label: 'New Bill', icon: Plus, path: '/billing', variant: 'gold' as const },
   { label: 'Purchase Entry', icon: ShoppingCart, path: '/purchase', variant: 'maroon' as const },
@@ -126,6 +46,80 @@ export const Dashboard: React.FC = () => {
   const { t } = useLanguage();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { bills, sarees, orders, settings } = useData();
+
+  // Statistics Calculation
+  const today = new Date().toISOString().split('T')[0];
+  const todaysBills = bills.filter(b => b.date === today && (b.status === 'Paid' || b.status === 'Due'));
+  const totalSalesToday = todaysBills.reduce((sum, b) => sum + (b.grandTotal || 0), 0);
+
+  const totalStockValue = sarees.reduce((sum, s) => sum + ((s.purchasePrice || 0) * (s.stockQty || 0)), 0);
+  const totalStockCount = sarees.reduce((sum, s) => sum + (s.stockQty || 0), 0);
+
+  const lowStockItems = sarees
+    .filter(s => s.stockQty < 3 && s.status === 'available')
+    .slice(0, 5);
+
+  const recentBillsData = bills
+    .slice(0, 5)
+    .map(b => ({
+      id: b.billNo || b.id,
+      customer: b.customerName || 'Unknown',
+      amount: `₹${b.grandTotal.toLocaleString()}`,
+      time: b.date,
+      status: b.status
+    }));
+
+  const [bestSelling, setBestSelling] = React.useState<{ name: string; sales: number; revenue: string }[]>([]);
+
+  React.useEffect(() => {
+    const fetchBestSelling = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/reports/bestselling');
+        if (res.ok) {
+          setBestSelling(await res.json());
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchBestSelling();
+  }, []);
+
+  const stats: StatCard[] = [
+    {
+      titleKey: 'dashboard.todaySales',
+      value: `₹${totalSalesToday.toLocaleString()}`,
+      subValue: `${todaysBills.length} bills`,
+      icon: TrendingUp,
+      color: 'primary',
+      visible: settings?.visibleWidgets?.todaySales !== false
+    },
+    {
+      titleKey: 'dashboard.stockValue',
+      value: `₹${totalStockValue.toLocaleString()}`,
+      subValue: `${totalStockCount} items`,
+      icon: Package,
+      color: 'success',
+      visible: true // Always visible
+    },
+    {
+      titleKey: 'dashboard.orders',
+      value: `${orders.filter(o => o.status === 'Booked').length}`,
+      subValue: 'Pending Orders',
+      icon: ShoppingCart,
+      color: 'warning',
+      visible: true // Always visible
+    },
+    {
+      titleKey: 'dashboard.lowStock',
+      value: `${lowStockItems.length}`,
+      subValue: 'Items need reorder',
+      icon: AlertTriangle,
+      color: 'destructive',
+      visible: settings?.visibleWidgets?.lowStock !== false
+    }
+  ].filter(s => (s as any).visible) as StatCard[];
 
   const getColorClasses = (color: StatCard['color']) => {
     switch (color) {
@@ -234,14 +228,14 @@ export const Dashboard: React.FC = () => {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="font-display text-lg">Recent Bills</CardTitle>
-              <Button variant="ghost" size="sm" onClick={() => navigate('/bill-history')}>
+              <Button variant="ghost" size="sm" onClick={() => navigate('/billing')}>
                 View All
               </Button>
             </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {recentBills.map((bill) => (
+              {recentBillsData.map((bill) => (
                 <div
                   key={bill.id}
                   className="flex items-center justify-between rounded-lg border border-border/50 bg-muted/30 p-3 transition-colors hover:bg-muted/50"
@@ -269,42 +263,46 @@ export const Dashboard: React.FC = () => {
                   </div>
                 </div>
               ))}
+              {recentBillsData.length === 0 && <p className="text-center text-muted-foreground">No recent bills</p>}
             </div>
           </CardContent>
         </Card>
 
         {/* Low Stock Alert */}
-        <Card className="border-0 shadow-sm">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-warning" />
-              <CardTitle className="font-display text-lg">{t('dashboard.lowStock')}</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {lowStockItems.map((item, index) => (
-                <div
-                  key={index}
-                  className="rounded-lg border border-warning/30 bg-warning/5 p-3"
-                >
-                  <p className="font-medium text-foreground">{item.name}</p>
-                  <div className="mt-1 flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">
-                      Stock: <span className="font-semibold text-warning">{item.stock}</span>
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      Min: {item.threshold}
-                    </span>
+        {settings?.visibleWidgets?.lowStock !== false && (
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-warning" />
+                <CardTitle className="font-display text-lg">{t('dashboard.lowStock')}</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {lowStockItems.map((item, index) => (
+                  <div
+                    key={index}
+                    className="rounded-lg border border-warning/30 bg-warning/5 p-3"
+                  >
+                    <p className="font-medium text-foreground">{item.name}</p>
+                    <div className="mt-1 flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">
+                        Stock: <span className="font-semibold text-warning">{item.stockQty}</span>
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        Type: {item.stockType}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-            <Button variant="outline" className="mt-4 w-full" onClick={() => navigate('/inventory')}>
-              View All Stock
-            </Button>
-          </CardContent>
-        </Card>
+                ))}
+                {lowStockItems.length === 0 && <p className="text-center text-muted-foreground">No stock alerts</p>}
+              </div>
+              <Button variant="outline" className="mt-4 w-full" onClick={() => navigate('/products')}>
+                View All Stock
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Best Selling */}
@@ -333,6 +331,11 @@ export const Dashboard: React.FC = () => {
                 </div>
               </div>
             ))}
+            {bestSelling.length === 0 && (
+              <div className="col-span-full text-center text-muted-foreground py-8">
+                No sales data available yet
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

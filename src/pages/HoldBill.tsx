@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, PlayCircle, Trash2, Clock, ShoppingBag, User } from 'lucide-react';
+import { Search, PlayCircle, Trash2, Clock, ShoppingBag, User, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,73 +10,57 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 
-interface HeldBill {
-    id: string;
-    customerName: string;
-    mobile: string;
-    timestamp: Date;
-    items: number;
-    totalAmount: number;
-    reason?: string;
-}
-
-const mockHeldBills: HeldBill[] = [
-    {
-        id: 'HB-101',
-        customerName: 'Lakshmi Narayanan',
-        mobile: '9840012345',
-        timestamp: new Date(Date.now() - 1000 * 60 * 15), // 15 mins ago
-        items: 3,
-        totalAmount: 45000,
-        reason: 'Checking other colors',
-    },
-    {
-        id: 'HB-102',
-        customerName: 'Guest Customer',
-        mobile: '',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-        items: 1,
-        totalAmount: 8500,
-        reason: 'Forgot wallet',
-    },
-    {
-        id: 'HB-103',
-        customerName: 'Sarah J',
-        mobile: '9988776655',
-        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-        items: 5,
-        totalAmount: 125000,
-        reason: 'Pending confirmation',
-    },
-];
+import { useData } from '@/contexts/DataContext';
 
 const HoldBill: React.FC = () => {
     const navigate = useNavigate();
-    const [heldBills, setHeldBills] = useState<HeldBill[]>(mockHeldBills);
+    const { bills } = useData();
     const [searchTerm, setSearchTerm] = useState('');
 
+    // Filter for bills with status 'Hold' or 'Held' (case insensitive to be safe)
+    const heldBills = bills.filter(bill =>
+        (bill.status || '').toLowerCase() === 'hold' ||
+        (bill.status || '').toLowerCase() === 'held'
+    ).map(bill => ({
+        id: bill.billNo || bill.id,
+        customerName: bill.customerName,
+        mobile: bill.customerMobile,
+        timestamp: new Date(bill.date), // Using bill date as timestamp
+        items: bill.items.length,
+        totalAmount: bill.grandTotal,
+        reason: 'Held Bill', // Backend might not store reason yet, so generic for now
+        rawId: bill.id // Keep original ID for actions
+    }));
+
     const handleResume = (id: string) => {
-        toast.success(`Resuming bill ${id}...`);
-        // In a real app, this would load the bill data into the Billing context
+        toast.info(`Resuming functionality to be implemented for ${id}`);
+        // To implement resume: Navigate to billing with bill data pre-filled
+        // For now just navigate
         navigate('/billing');
     };
 
     const handleDelete = (id: string) => {
-        setHeldBills(prev => prev.filter(bill => bill.id !== id));
-        toast.success(`Held bill ${id} removed.`);
+        // Implement delete logic here (e.g. update status to Cancelled via API)
+        toast.info(`Delete functionality to be connected for ${id}`);
     };
 
     const filteredBills = heldBills.filter(bill =>
-        bill.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        bill.mobile.includes(searchTerm) ||
-        bill.id.toLowerCase().includes(searchTerm.toLowerCase())
+        (bill.customerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (bill.mobile || '').includes(searchTerm) ||
+        (bill.id || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
         <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-2">
-                <h1 className="text-3xl font-bold tracking-tight font-display text-primary">Held Bills</h1>
-                <p className="text-muted-foreground">Resume or clear suspended transactions.</p>
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex flex-col gap-2">
+                    <h1 className="text-3xl font-bold tracking-tight font-display text-primary">Held Bills</h1>
+                    <p className="text-muted-foreground">Resume or clear suspended transactions.</p>
+                </div>
+                <Button variant="outline" onClick={() => navigate('/billing')}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    New Bill
+                </Button>
             </div>
 
             <div className="flex w-full items-center gap-4">
@@ -139,7 +123,7 @@ const HoldBill: React.FC = () => {
                                 <div className="flex gap-2 pt-2">
                                     <Button
                                         className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                                        onClick={() => handleResume(bill.id)}
+                                        onClick={() => handleResume(bill.rawId)}
                                     >
                                         <PlayCircle className="mr-2 h-4 w-4" />
                                         Resume
@@ -147,7 +131,7 @@ const HoldBill: React.FC = () => {
                                     <Button
                                         variant="outline"
                                         className="text-destructive hover:bg-destructive hover:text-white border-destructive/20"
-                                        onClick={() => handleDelete(bill.id)}
+                                        onClick={() => handleDelete(bill.rawId)}
                                     >
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
@@ -156,6 +140,7 @@ const HoldBill: React.FC = () => {
                         </CardContent>
                     </Card>
                 ))}
+
 
                 {filteredBills.length === 0 && (
                     <div className="col-span-full py-12 text-center text-muted-foreground border-2 border-dashed rounded-lg">

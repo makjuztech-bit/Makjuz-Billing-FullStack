@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     FileText,
     Download,
@@ -17,8 +17,49 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { toast } from 'sonner';
+
+interface HsnItem {
+    code: string;
+    description: string;
+    taxable: number;
+    tax: number;
+    rate: number;
+}
+
+interface GstData {
+    totalTaxable: number;
+    totalTax: number;
+    b2bCount: number;
+    hsnSummary: HsnItem[];
+}
 
 const GstReports: React.FC = () => {
+    const [data, setData] = useState<GstData>({ totalTaxable: 0, totalTax: 0, b2bCount: 0, hsnSummary: [] });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchGstData();
+    }, []);
+
+    const fetchGstData = async () => {
+        try {
+            setLoading(true);
+            const response = await fetch('http://localhost:5000/api/reports/gst');
+            if (response.ok) {
+                const result = await response.json();
+                setData(result);
+            } else {
+                toast.error('Failed to fetch GST data');
+            }
+        } catch (error) {
+            console.error('Error fetching GST data:', error);
+            toast.error('Error fetching GST data');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -27,10 +68,10 @@ const GstReports: React.FC = () => {
                     <p className="text-muted-foreground">GSTR-1, GSTR-3B Sales Data & HSN Summaries.</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => toast.info('JSON Download coming soon')}>
                         <Download className="mr-2 h-4 w-4" /> Download JSON
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => toast.info('Excel Export coming soon')}>
                         <FileText className="mr-2 h-4 w-4" /> Export Excel
                     </Button>
                 </div>
@@ -43,7 +84,7 @@ const GstReports: React.FC = () => {
                             <Label>Month of Return</Label>
                             <Input type="month" />
                         </div>
-                        <Button className="w-full md:w-auto">
+                        <Button className="w-full md:w-auto" onClick={() => { fetchGstData(); toast.success('Data refreshed'); }}>
                             Fetch Data
                         </Button>
                     </div>
@@ -56,7 +97,7 @@ const GstReports: React.FC = () => {
                         <CardTitle className="text-sm font-medium">Total Taxable Value</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₹8,50,000</div>
+                        <div className="text-2xl font-bold">₹{data.totalTaxable.toLocaleString()}</div>
                     </CardContent>
                 </Card>
                 <Card>
@@ -64,7 +105,7 @@ const GstReports: React.FC = () => {
                         <CardTitle className="text-sm font-medium">Total CGST + SGST</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-destructive">₹42,500</div>
+                        <div className="text-2xl font-bold text-destructive">₹{data.totalTax.toLocaleString()}</div>
                     </CardContent>
                 </Card>
                 <Card>
@@ -72,7 +113,7 @@ const GstReports: React.FC = () => {
                         <CardTitle className="text-sm font-medium">B2B Invoices</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">5</div>
+                        <div className="text-2xl font-bold">{data.b2bCount}</div>
                         <p className="text-xs text-muted-foreground">Wholesale</p>
                     </CardContent>
                 </Card>
@@ -94,20 +135,25 @@ const GstReports: React.FC = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            <TableRow>
-                                <TableCell className="font-mono">5007</TableCell>
-                                <TableCell>Woven fabrics of Silk (Sarees)</TableCell>
-                                <TableCell className="text-right">₹6,50,000</TableCell>
-                                <TableCell className="text-right">5%</TableCell>
-                                <TableCell className="text-right font-bold">₹32,500</TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="font-mono">5208</TableCell>
-                                <TableCell>Woven fabrics of Cotton</TableCell>
-                                <TableCell className="text-right">₹2,00,000</TableCell>
-                                <TableCell className="text-right">5%</TableCell>
-                                <TableCell className="text-right font-bold">₹10,000</TableCell>
-                            </TableRow>
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="text-center py-8">Loading...</TableCell>
+                                </TableRow>
+                            ) : data.hsnSummary.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="text-center py-8">No data found</TableCell>
+                                </TableRow>
+                            ) : (
+                                data.hsnSummary.map((item) => (
+                                    <TableRow key={item.code}>
+                                        <TableCell className="font-mono">{item.code}</TableCell>
+                                        <TableCell>{item.description}</TableCell>
+                                        <TableCell className="text-right">₹{item.taxable.toLocaleString()}</TableCell>
+                                        <TableCell className="text-right">{item.rate}%</TableCell>
+                                        <TableCell className="text-right font-bold">₹{item.tax.toLocaleString()}</TableCell>
+                                    </TableRow>
+                                ))
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>

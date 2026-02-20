@@ -12,12 +12,26 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useData } from '@/contexts/DataContext';
 import { toast } from 'sonner';
 
 const Settings: React.FC = () => {
-    const handleSave = () => {
-        toast.success('Settings Saved Successfully');
+    const { settings, updateSettings } = useData();
+    const [localSettings, setLocalSettings] = useState<any>(null);
+
+    React.useEffect(() => {
+        if (settings) {
+            setLocalSettings(settings);
+        }
+    }, [settings]);
+
+    const handleSave = async () => {
+        if (localSettings) {
+            await updateSettings(localSettings);
+        }
     };
+
+    if (!localSettings) return <div className="p-8 text-center text-muted-foreground italic">Loading settings...</div>;
 
     return (
         <div className="flex flex-col gap-6 max-w-4xl mx-auto">
@@ -47,23 +61,38 @@ const Settings: React.FC = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label>Shop Name</Label>
-                                    <Input defaultValue="Lakshmi Silks & Sarees" />
+                                    <Input
+                                        value={localSettings.shopName || ''}
+                                        onChange={e => setLocalSettings({ ...localSettings, shopName: e.target.value })}
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Phone Number</Label>
-                                    <Input defaultValue="9876543210" />
+                                    <Input
+                                        value={localSettings.phone || ''}
+                                        onChange={e => setLocalSettings({ ...localSettings, phone: e.target.value })}
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Address Line 1</Label>
-                                    <Input defaultValue="123, West Mada Street" />
+                                    <Input
+                                        value={localSettings.address1 || ''}
+                                        onChange={e => setLocalSettings({ ...localSettings, address1: e.target.value })}
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Address Line 2</Label>
-                                    <Input defaultValue="Kanchipuram - 631501" />
+                                    <Input
+                                        value={localSettings.address2 || ''}
+                                        onChange={e => setLocalSettings({ ...localSettings, address2: e.target.value })}
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>GSTIN</Label>
-                                    <Input defaultValue="33ABCDE1234F1Z5" />
+                                    <Input
+                                        value={localSettings.gstin || ''}
+                                        onChange={e => setLocalSettings({ ...localSettings, gstin: e.target.value })}
+                                    />
                                 </div>
                             </div>
                             <Button onClick={handleSave}>Save Changes</Button>
@@ -85,23 +114,35 @@ const Settings: React.FC = () => {
                                     <Label className="text-base">Enable GST Billing</Label>
                                     <p className="text-sm text-muted-foreground">Toggle tax calculation on bills.</p>
                                 </div>
-                                <Switch defaultChecked={true} />
+                                <Switch
+                                    checked={localSettings.enableGst}
+                                    onCheckedChange={checked => setLocalSettings({ ...localSettings, enableGst: checked })}
+                                />
                             </div>
                             <div className="flex items-center justify-between rounded-lg border p-4">
                                 <div className="space-y-0.5">
                                     <Label className="text-base">Tamil Description</Label>
                                     <p className="text-sm text-muted-foreground">Print item names in Tamil on invoice.</p>
                                 </div>
-                                <Switch defaultChecked={true} />
+                                <Switch
+                                    checked={localSettings.tamilDescription}
+                                    onCheckedChange={checked => setLocalSettings({ ...localSettings, tamilDescription: checked })}
+                                />
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label>Default Printer</Label>
-                                    <Input defaultValue="Thermal 80mm" />
+                                    <Input
+                                        value={localSettings.defaultPrinter || ''}
+                                        onChange={e => setLocalSettings({ ...localSettings, defaultPrinter: e.target.value })}
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Bill Prefix</Label>
-                                    <Input defaultValue="SILK-" />
+                                    <Input
+                                        value={localSettings.billPrefix || ''}
+                                        onChange={e => setLocalSettings({ ...localSettings, billPrefix: e.target.value })}
+                                    />
                                 </div>
                             </div>
                             <Button onClick={handleSave}>Save Preferences</Button>

@@ -16,6 +16,7 @@ interface AuthContextType {
   login: (username: string, password: string, branch?: string) => Promise<boolean>;
   logout: () => void;
   hasPermission: (permission: string) => boolean;
+  updateUserData: (data: Partial<User>) => void;
 }
 
 const rolePermissions: Record<UserRole, string[]> = {
@@ -44,20 +45,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<User | null>(null);
 
   const login = async (username: string, password: string, branch?: string): Promise<boolean> => {
-    // Simulated login - replace with actual auth
-    const demoUsers: Record<string, User> = {
-      admin: { id: '1', username: 'admin', name: 'Admin User', role: 'admin', branch: 'main' },
-      manager: { id: '2', username: 'manager', name: 'Store Manager', role: 'manager', branch: 'main' },
-      cashier: { id: '3', username: 'cashier', name: 'Cashier', role: 'cashier', branch: 'main' },
-      salesman: { id: '4', username: 'salesman', name: 'Sales Person', role: 'salesman', branch: 'main' },
-    };
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, branch })
+      });
 
-    if (demoUsers[username] && password === 'demo123') {
-      const loggedInUser = { ...demoUsers[username], branch: branch || 'main' };
-      setUser(loggedInUser);
-      return true;
+      if (res.ok) {
+        const userData = await res.json();
+        setUser(userData);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Login error:', error);
+      return false;
     }
-    return false;
   };
 
   const logout = () => {
@@ -70,8 +74,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return permissions.includes('*') || permissions.includes(permission);
   };
 
+  const updateUserData = (data: Partial<User>) => {
+    if (user) {
+      setUser({ ...user, ...data });
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, hasPermission }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, logout, hasPermission, updateUserData }}>
       {children}
     </AuthContext.Provider>
   );

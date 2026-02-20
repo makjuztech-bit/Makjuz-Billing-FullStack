@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     BarChart,
     LineChart,
     Calendar,
     Download,
     Printer,
-    Filter
+    Filter,
+    Plus
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,8 +30,56 @@ import {
     TableRow,
 } from '@/components/ui/table';
 
+interface ReportSummary {
+    totalSales: number;
+    billsCount: number;
+    avgBillValue: number;
+    profitEstimate: number;
+}
+
+interface DetailedReportItem {
+    id: string;
+    date: string;
+    category: string;
+    cash: number;
+    card: number;
+    totalAmount: number;
+}
+
 const Reports: React.FC = () => {
+    const navigate = useNavigate();
     const [reportType, setReportType] = useState('dailysales');
+    const [summary, setSummary] = useState<ReportSummary>({ totalSales: 0, billsCount: 0, avgBillValue: 0, profitEstimate: 0 });
+    const [detailed, setDetailed] = useState<DetailedReportItem[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const [summaryRes, detailedRes] = await Promise.all([
+                    fetch('http://localhost:5000/api/reports/summary'),
+                    fetch('http://localhost:5000/api/reports/detailed')
+                ]);
+
+                if (summaryRes.ok && detailedRes.ok) {
+                    const summaryData = await summaryRes.json();
+                    const detailedData = await detailedRes.json();
+                    setSummary(summaryData);
+                    setDetailed(detailedData);
+                } else {
+                    toast.error('Failed to load reports');
+                }
+            } catch (error) {
+                console.error('Error loading reports:', error);
+                toast.error('Error loading reports');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     return (
         <div className="flex flex-col gap-6">
@@ -38,10 +89,13 @@ const Reports: React.FC = () => {
                     <p className="text-muted-foreground">Insights, Sales Reports and Analytics.</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => navigate('/billing')}>
+                        <Plus className="mr-2 h-4 w-4" /> New Bill
+                    </Button>
+                    <Button variant="outline" onClick={() => toast.info('Export functionality coming soon')}>
                         <Download className="mr-2 h-4 w-4" /> Export CSV
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => toast.info('Print functionality coming soon')}>
                         <Printer className="mr-2 h-4 w-4" /> Print
                     </Button>
                 </div>
@@ -73,7 +127,7 @@ const Reports: React.FC = () => {
                             <Label>To Date</Label>
                             <Input type="date" />
                         </div>
-                        <Button className="w-full md:w-auto">
+                        <Button className="w-full md:w-auto" onClick={() => toast.success('Report updated!')}>
                             <Filter className="mr-2 h-4 w-4" /> Generate
                         </Button>
                     </div>
@@ -86,8 +140,8 @@ const Reports: React.FC = () => {
                         <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₹12,45,000</div>
-                        <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+                        <div className="text-2xl font-bold">₹{summary.totalSales.toLocaleString()}</div>
+                        <p className="text-xs text-muted-foreground">Lifetime</p>
                     </CardContent>
                 </Card>
                 <Card>
@@ -95,7 +149,7 @@ const Reports: React.FC = () => {
                         <CardTitle className="text-sm font-medium">Bills Count</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">482</div>
+                        <div className="text-2xl font-bold">{summary.billsCount}</div>
                     </CardContent>
                 </Card>
                 <Card>
@@ -103,7 +157,7 @@ const Reports: React.FC = () => {
                         <CardTitle className="text-sm font-medium">Avg. Bill Value</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₹2,580</div>
+                        <div className="text-2xl font-bold">₹{summary.avgBillValue.toLocaleString()}</div>
                     </CardContent>
                 </Card>
                 <Card>
@@ -111,8 +165,8 @@ const Reports: React.FC = () => {
                         <CardTitle className="text-sm font-medium">Profit Estimate</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-green-600">₹3,10,000</div>
-                        <p className="text-xs text-muted-foreground">Approx. Margin</p>
+                        <div className="text-2xl font-bold text-green-600">₹{summary.profitEstimate.toLocaleString()}</div>
+                        <p className="text-xs text-muted-foreground">~20% Est. Margin</p>
                     </CardContent>
                 </Card>
             </div>
@@ -133,20 +187,25 @@ const Reports: React.FC = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            <TableRow>
-                                <TableCell>12 Mar 2024</TableCell>
-                                <TableCell>Silk Sarees</TableCell>
-                                <TableCell className="text-right">₹45,000</TableCell>
-                                <TableCell className="text-right">₹22,000</TableCell>
-                                <TableCell className="text-right font-bold">₹67,000</TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell>11 Mar 2024</TableCell>
-                                <TableCell>Cotton & Fancy</TableCell>
-                                <TableCell className="text-right">₹12,000</TableCell>
-                                <TableCell className="text-right">₹8,500</TableCell>
-                                <TableCell className="text-right font-bold">₹20,500</TableCell>
-                            </TableRow>
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="text-center py-8">Loading...</TableCell>
+                                </TableRow>
+                            ) : detailed.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="text-center py-8">No records found</TableCell>
+                                </TableRow>
+                            ) : (
+                                detailed.map((item) => (
+                                    <TableRow key={item.id}>
+                                        <TableCell>{item.date}</TableCell>
+                                        <TableCell>{item.category}</TableCell>
+                                        <TableCell className="text-right">₹{item.cash.toLocaleString()}</TableCell>
+                                        <TableCell className="text-right">₹{item.card.toLocaleString()}</TableCell>
+                                        <TableCell className="text-right font-bold">₹{item.totalAmount.toLocaleString()}</TableCell>
+                                    </TableRow>
+                                ))
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>

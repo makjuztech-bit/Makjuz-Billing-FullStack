@@ -10,9 +10,11 @@ import {
   Calendar as CalendarIcon,
   CreditCard,
   User,
-  MoreHorizontal
+  MoreHorizontal,
+  Plus
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -105,12 +107,34 @@ const initialBills: BillRecord[] = [
   },
 ];
 
+import { useData } from '@/contexts/DataContext';
+
+// Mock Data removed
+// interface BillRecord is locally defined, I'll map to it or use it.
+
 const BillHistory: React.FC = () => {
   const { t } = useLanguage();
-  const [bills, setBills] = useState<BillRecord[]>(initialBills);
+  const navigate = useNavigate();
+  const { bills } = useData(); // Fetch real bills
+
+  // Map backend bills to local display format
+  // We can just use filteredBills derived from context directly instead of local state 'bills'
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterPayment, setFilterPayment] = useState<string>('all');
+
+  const displayBills = bills.map(b => ({
+    billNo: b.billNo || b.id,
+    date: b.date,
+    customerName: b.customerName || 'Unknown',
+    mobile: b.customerMobile || '-',
+    amount: b.grandTotal,
+    paymentMode: b.paymentMethod,
+    status: b.status,
+    salesman: 'Admin', // Default for now
+    itemCount: b.items.reduce((sum, i) => sum + i.qty, 0)
+  }));
 
   const handleReprint = (billNo: string, type: 'thermal' | 'a4') => {
     toast.info(`Printing Bill ${billNo} in ${type.toUpperCase()} format...`);
@@ -133,17 +157,20 @@ const BillHistory: React.FC = () => {
     toast.warning(`Bill ${billNo} cancellation request sent to Admin`);
   };
 
-  const filteredBills = bills.filter(bill => {
-    const matchesSearch = 
+  const filteredBills = displayBills.filter(bill => {
+    const matchesSearch =
       bill.billNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
       bill.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       bill.mobile.includes(searchTerm);
-    
+
     const matchesStatus = filterStatus === 'all' || bill.status.toLowerCase() === filterStatus.toLowerCase();
-    const matchesPayment = filterPayment === 'all' || bill.paymentMode.toLowerCase() === filterPayment.toLowerCase();
+
+    // Check if paymentMode exists before toLowerCase, defaulting to empty string if undefined (though my map ensures it)
+    const matchesPayment = filterPayment === 'all' || (bill.paymentMode || '').toLowerCase() === filterPayment.toLowerCase();
 
     return matchesSearch && matchesStatus && matchesPayment;
   });
+
 
   return (
     <div className="flex flex-col gap-6">
@@ -153,6 +180,10 @@ const BillHistory: React.FC = () => {
           <p className="text-muted-foreground">Manage and track past transactions</p>
         </div>
         <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => navigate('/billing')}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Bill
+          </Button>
           <Button variant="outline">
             <Download className="mr-2 h-4 w-4" />
             Export Excel
@@ -186,7 +217,7 @@ const BillHistory: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             <div className="w-full md:w-48 space-y-2">
               <label className="text-sm font-medium">Status</label>
               <Select value={filterStatus} onValueChange={setFilterStatus}>
@@ -195,7 +226,7 @@ const BillHistory: React.FC = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="paid">Paid</SelectItem>
                   <SelectItem value="cancelled">Cancelled</SelectItem>
                   <SelectItem value="held">Held</SelectItem>
                 </SelectContent>
@@ -267,14 +298,14 @@ const BillHistory: React.FC = () => {
                     <TableCell>
                       <Badge
                         variant={
-                          bill.status === 'Completed'
-                            ? 'default' // Changed from 'success' as it might not be in theme
+                          bill.status === 'Paid'
+                            ? 'default'
                             : bill.status === 'Cancelled'
-                            ? 'destructive'
-                            : 'secondary'
+                              ? 'destructive'
+                              : 'secondary'
                         }
                         className={
-                          bill.status === 'Completed' ? 'bg-green-100 text-green-800 hover:bg-green-100' : ''
+                          bill.status === 'Paid' ? 'bg-green-100 text-green-800 hover:bg-green-100' : ''
                         }
                       >
                         {bill.status}
@@ -290,7 +321,7 @@ const BillHistory: React.FC = () => {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => {}}>
+                          <DropdownMenuItem onClick={() => { }}>
                             <Eye className="mr-2 h-4 w-4" /> View Details
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
@@ -308,7 +339,7 @@ const BillHistory: React.FC = () => {
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           {bill.status !== 'Cancelled' && (
-                            <DropdownMenuItem 
+                            <DropdownMenuItem
                               className="text-destructive focus:text-destructive"
                               onClick={() => handleCancel(bill.billNo)}
                             >

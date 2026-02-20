@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     History,
     Wallet,
     Search,
     MessageSquare,
-    Phone
+    Phone,
+    Plus
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,6 +21,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { toast } from 'sonner';
+import { useData } from '@/contexts/DataContext';
 
 interface DueRecord {
     id: string;
@@ -30,13 +33,31 @@ interface DueRecord {
     daysOverdue: number;
 }
 
-const mockDues: DueRecord[] = [
-    { id: '1', customer: 'Lakshmi Silks', mobile: '9988776655', billRef: 'SILK-105', amount: 45000, dueDate: '2024-03-01', daysOverdue: 15 },
-    { id: '2', customer: 'Ravi Kumar', mobile: '8877665544', billRef: 'SILK-122', amount: 500, dueDate: '2024-03-10', daysOverdue: 5 },
-];
-
 const DueManagement: React.FC = () => {
-    const [dues, setDues] = useState<DueRecord[]>(mockDues);
+    const navigate = useNavigate();
+    const { bills } = useData();
+
+    // Filter bills with dues
+    const dues: DueRecord[] = bills
+        .filter(bill => bill.status === 'Due' || (bill.dueAmount && bill.dueAmount > 0))
+        .map(bill => {
+            const billDate = new Date(bill.date);
+            const today = new Date();
+            const diffTime = Math.abs(today.getTime() - billDate.getTime());
+            const daysOverdue = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            return {
+                id: bill.id,
+                customer: bill.customerName || 'Unknown',
+                mobile: bill.customerMobile || '',
+                billRef: bill.billNo,
+                amount: bill.dueAmount || bill.grandTotal,
+                dueDate: bill.date,
+                daysOverdue: daysOverdue
+            };
+        });
+
+    const totalOutstanding = dues.reduce((sum, d) => sum + (d.amount || 0), 0);
 
     const handleCollect = (id: string, amount: number) => {
         toast.info(`Opening payment collection for ₹${amount}`);
@@ -53,15 +74,21 @@ const DueManagement: React.FC = () => {
                     <h1 className="text-3xl font-bold tracking-tight font-display text-primary">Due Management</h1>
                     <p className="text-muted-foreground">Track and collect customer credits.</p>
                 </div>
-                <Card className="bg-destructive text-destructive-foreground border-none">
-                    <CardContent className="p-4 flex items-center gap-4">
-                        <Wallet className="h-8 w-8 opacity-80" />
-                        <div>
-                            <p className="text-sm opacity-90">Total Outstanding</p>
-                            <p className="text-2xl font-bold">₹45,500</p>
-                        </div>
-                    </CardContent>
-                </Card>
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" onClick={() => navigate('/billing')}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        New Bill
+                    </Button>
+                    <Card className="bg-destructive text-destructive-foreground border-none">
+                        <CardContent className="p-4 flex items-center gap-4">
+                            <Wallet className="h-8 w-8 opacity-80" />
+                            <div>
+                                <p className="text-sm opacity-90">Total Outstanding</p>
+                                <p className="text-2xl font-bold">₹{totalOutstanding.toLocaleString()}</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
 
             <Card className="border-0 shadow-sm">
@@ -117,6 +144,13 @@ const DueManagement: React.FC = () => {
                                     </TableCell>
                                 </TableRow>
                             ))}
+                            {dues.length === 0 && (
+                                <TableRow>
+                                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                                        No pending dues found
+                                    </TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>

@@ -29,25 +29,90 @@ import {
 } from '@/components/ui/table';
 import { toast } from 'sonner';
 
+import { useData } from '@/contexts/DataContext';
+
 const PurchaseReturn: React.FC = () => {
+    const { suppliers, purchases } = useData();
     const [supplier, setSupplier] = useState('');
     const [purchaseBill, setPurchaseBill] = useState('');
     const [returnItems, setReturnItems] = useState<any[]>([]);
+    const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+    const [returnReasons, setReturnReasons] = useState<Record<string, string>>({});
 
     const handleSearchBill = () => {
         if (!purchaseBill) return;
-        toast.info(`Fetching details for Bill: ${purchaseBill}`);
-        // Mock items
-        setReturnItems([
-            { id: 1, barcode: 'KS-001', name: 'Silk Saree Red', cost: 15000, qty: 1, reason: '' },
-            { id: 2, barcode: 'KS-002', name: 'Silk Saree Blue', cost: 12000, qty: 1, reason: '' },
-        ]);
+
+        const purchase = purchases.find(p => p.billNo.toLowerCase() === purchaseBill.toLowerCase() && (!supplier || p.supplierId === supplier));
+
+        if (purchase) {
+            toast.success(`Found Bill: ${purchase.billNo}`);
+            setReturnItems(purchase.items.map(item => ({
+                id: item.id || (item as any)._id,
+                barcode: item.barcode,
+                name: item.name,
+                cost: item.costPrice,
+                qty: item.qty,
+                returnedQty: (item as any).returnedQty || 0
+            })));
+            if (!supplier) setSupplier(purchase.supplierId);
+            setSelectedItems(new Set());
+            setReturnReasons({});
+        } else {
+            toast.error('Bill not found or does not match supplier');
+            setReturnItems([]);
+        }
     };
 
-    const handleReturn = () => {
-        toast.success(`Items returned to ${supplier || 'Supplier'}`);
-        setReturnItems([]);
-        setPurchaseBill('');
+    const toggleItemSelection = (id: string) => {
+        const newSelected = new Set(selectedItems);
+        if (newSelected.has(id)) newSelected.delete(id);
+        else newSelected.add(id);
+        setSelectedItems(newSelected);
+    };
+
+    const handleReasonChange = (id: string, reason: string) => {
+        setReturnReasons(prev => ({ ...prev, [id]: reason }));
+    };
+
+    const handleReturn = async () => {
+        if (selectedItems.size === 0) {
+            toast.error('Please select at least one item to return');
+            return;
+        }
+
+        const itemsToReturn = Array.from(selectedItems).map(id => {
+            const item = returnItems.find(i => i.id === id);
+            return {
+                barcode: item.barcode,
+                qty: 1, // Defaulting to 1 for now
+                reason: returnReasons[id] || 'Defective'
+            };
+        });
+
+        const purchase = purchases.find(p => p.billNo.toLowerCase() === purchaseBill.toLowerCase());
+
+        try {
+            const res = await fetch('http://localhost:5000/api/purchases/return', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    purchaseId: purchase?.id || (purchase as any)._id,
+                    itemsToReturn
+                }),
+            });
+
+            if (res.ok) {
+                toast.success(`Items returned to supplier successfully`);
+                setReturnItems([]);
+                setPurchaseBill('');
+                setSelectedItems(new Set());
+            } else {
+                const data = await res.json();
+                toast.error(data.message || 'Failed to process return');
+            }
+        } catch (error) {
+            toast.error('Error processing return');
+        }
     };
 
     return (
@@ -77,8 +142,9 @@ const PurchaseReturn: React.FC = () => {
                                     <SelectValue placeholder="Choose Supplier" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="sup1">Weaver Raman</SelectItem>
-                                    <SelectItem value="sup2">Silk House TN</SelectItem>
+                                    {suppliers.map(s => (
+                                        <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -113,17 +179,30 @@ const PurchaseReturn: React.FC = () => {
                                         {returnItems.map((item) => (
                                             <TableRow key={item.id}>
                                                 <TableCell>
-                                                    <input type="checkbox" className="rounded border-gray-300" />
+                                                    <input
+                                                        type="checkbox"
+                                                        className="rounded border-gray-300"
+                                                        checked={selectedItems.has(item.id)}
+                                                        onChange={() => toggleItemSelection(item.id)}
+                                                        disabled={item.returnedQty >= item.qty}
+                                                    />
                                                 </TableCell>
                                                 <TableCell>
                                                     <div className="flex flex-col">
                                                         <span className="font-medium">{item.name}</span>
                                                         <span className="text-xs text-muted-foreground">{item.barcode}</span>
+                                                        {item.returnedQty > 0 && <span className="text-[10px] text-orange-600 font-bold uppercase mt-1">Returned: {item.returnedQty} / {item.qty}</span>}
                                                     </div>
                                                 </TableCell>
                                                 <TableCell className="text-right">₹{item.cost.toLocaleString()}</TableCell>
                                                 <TableCell>
-                                                    <Input placeholder="Why returning?" className="h-8" />
+                                                    <Input
+                                                        placeholder="Why returning?"
+                                                        className="h-8"
+                                                        value={returnReasons[item.id] || ''}
+                                                        onChange={(e) => handleReasonChange(item.id, e.target.value)}
+                                                        disabled={!selectedItems.has(item.id)}
+                                                    />
                                                 </TableCell>
                                             </TableRow>
                                         ))}

@@ -30,50 +30,67 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
+import { toast } from 'sonner';
 
-interface Supplier {
-    id: string;
-    name: string;
-    contactPerson: string;
-    mobile: string;
-    gstin: string;
-    location: string;
-    pendingDue: number;
-}
-
-const mockSuppliers: Supplier[] = [
-    {
-        id: 'SUP-001',
-        name: 'Sri Krishna Weavers',
-        contactPerson: 'Ramanathan',
-        mobile: '9840044555',
-        gstin: '33AAACR2345H1Z3',
-        location: 'Kanchipuram',
-        pendingDue: 145000,
-    },
-    {
-        id: 'SUP-002',
-        name: 'Salem Silk House',
-        contactPerson: 'Balaji',
-        mobile: '8870099887',
-        gstin: '33BBBCS1234J1Z2',
-        location: 'Salem',
-        pendingDue: 50000,
-    },
-    {
-        id: 'SUP-003',
-        name: 'Coimbatore Cottons',
-        contactPerson: 'Senthil',
-        mobile: '9988776655',
-        gstin: '33CCCDD5678K1Z1',
-        location: 'Coimbatore',
-        pendingDue: 0,
-    },
-];
+import { useData } from '@/contexts/DataContext';
+import { Supplier } from '@/types';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogFooter
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 
 const SupplierManagement: React.FC = () => {
-    const [suppliers, setSuppliers] = useState<Supplier[]>(mockSuppliers);
+    const { suppliers, addSupplier, updateSupplier, deleteSupplier } = useData();
     const [searchTerm, setSearchTerm] = useState('');
+    const [isAddOpen, setIsAddOpen] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [newSupplier, setNewSupplier] = useState<Partial<Supplier>>({});
+
+    const handleSave = async () => {
+        if (!newSupplier.name) {
+            toast.error('Supplier name is required');
+            return;
+        }
+
+        const supplierData = {
+            name: newSupplier.name || '',
+            contactPerson: newSupplier.contactPerson || '',
+            mobile: newSupplier.mobile || '',
+            gstin: newSupplier.gstin || '',
+            location: newSupplier.location || '',
+            pendingDue: newSupplier.pendingDue || 0
+        };
+
+        if (isEditing && newSupplier.id) {
+            await updateSupplier(newSupplier.id, supplierData);
+            toast.success('Supplier updated successfully');
+        } else {
+            await addSupplier(supplierData as Supplier);
+            toast.success('Supplier added successfully');
+        }
+
+        setIsAddOpen(false);
+        setIsEditing(false);
+        setNewSupplier({});
+    };
+
+    const handleEdit = (supplier: Supplier) => {
+        setNewSupplier(supplier);
+        setIsEditing(true);
+        setIsAddOpen(true);
+    };
+
+    const handleDelete = async (id: string) => {
+        if (window.confirm('Are you sure you want to delete this supplier?')) {
+            await deleteSupplier(id);
+            toast.success('Supplier deleted');
+        }
+    };
 
     const filteredSuppliers = suppliers.filter(s =>
         s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -87,10 +104,59 @@ const SupplierManagement: React.FC = () => {
                     <h1 className="text-3xl font-bold tracking-tight font-display text-primary">Suppliers</h1>
                     <p className="text-muted-foreground">Manage vendors and payments.</p>
                 </div>
-                <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Supplier
-                </Button>
+                <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+                    <DialogTrigger asChild>
+                        <Button onClick={() => { setIsEditing(false); setNewSupplier({}); }}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add Supplier
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>{isEditing ? 'Edit Supplier' : 'Add New Supplier'}</DialogTitle>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="grid gap-2">
+                                <Label>Supplier Name</Label>
+                                <Input
+                                    value={newSupplier.name || ''}
+                                    onChange={e => setNewSupplier({ ...newSupplier, name: e.target.value })}
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label>Contact Person</Label>
+                                <Input
+                                    value={newSupplier.contactPerson || ''}
+                                    onChange={e => setNewSupplier({ ...newSupplier, contactPerson: e.target.value })}
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label>Mobile</Label>
+                                <Input
+                                    value={newSupplier.mobile || ''}
+                                    onChange={e => setNewSupplier({ ...newSupplier, mobile: e.target.value })}
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label>GSTIN</Label>
+                                <Input
+                                    value={newSupplier.gstin || ''}
+                                    onChange={e => setNewSupplier({ ...newSupplier, gstin: e.target.value })}
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label>Location</Label>
+                                <Input
+                                    value={newSupplier.location || ''}
+                                    onChange={e => setNewSupplier({ ...newSupplier, location: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button onClick={handleSave}>Save Supplier</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
 
             <div className="grid gap-6 md:grid-cols-[1fr_300px]">
@@ -167,11 +233,18 @@ const SupplierManagement: React.FC = () => {
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
                                                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                    <DropdownMenuItem>
-                                                        <FileText className="mr-2 h-4 w-4" /> View Purchase History
+                                                    <DropdownMenuItem onClick={() => handleEdit(supplier)}>
+                                                        <FileText className="mr-2 h-4 w-4" /> Edit Details
                                                     </DropdownMenuItem>
-                                                    <DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => toast.info('Purchase History coming soon')}>
+                                                        <Plus className="mr-2 h-4 w-4" /> View Purchase History
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => toast.info('Record Payment coming soon')}>
                                                         <Wallet className="mr-2 h-4 w-4" /> Record Payment
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(supplier.id)}>
+                                                        <MoreHorizontal className="mr-2 h-4 w-4" /> Delete Supplier
                                                     </DropdownMenuItem>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>

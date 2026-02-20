@@ -21,11 +21,48 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
+import { useData } from '@/contexts/DataContext';
+import { Order } from '@/types';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 const OrderBooking: React.FC = () => {
+    const { orders, addOrder } = useData();
+    const [customerMobile, setCustomerMobile] = useState('');
+    const [customerName, setCustomerName] = useState('');
+    const [description, setDescription] = useState('');
+    const [deliveryDate, setDeliveryDate] = useState('');
+    const [estimated, setEstimated] = useState(0);
+    const [advance, setAdvance] = useState(0);
+
     const handleSave = () => {
+        if (!customerMobile || !customerName || !description) {
+            toast.error('Please fill required details');
+            return;
+        }
+
+        const newOrder: Order = {
+            id: `ORD-${Date.now().toString().slice(-4)}`,
+            customerName,
+            customerMobile,
+            description,
+            deliveryDate,
+            totalEstimated: estimated,
+            advancePaid: advance,
+            status: 'Booked',
+            orderDate: new Date().toISOString().split('T')[0]
+        };
+
+        addOrder(newOrder);
         toast.success('Order Booking Saved Successfully');
+
+        // Reset
+        setCustomerMobile('');
+        setCustomerName('');
+        setDescription('');
+        setDeliveryDate('');
+        setEstimated(0);
+        setAdvance(0);
     };
 
     return (
@@ -47,11 +84,19 @@ const OrderBooking: React.FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label>Customer Mobile</Label>
-                                <Input placeholder="9988776655" />
+                                <Input
+                                    placeholder="9988776655"
+                                    value={customerMobile}
+                                    onChange={e => setCustomerMobile(e.target.value)}
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Customer Name</Label>
-                                <Input placeholder="Name" />
+                                <Input
+                                    placeholder="Name"
+                                    value={customerName}
+                                    onChange={e => setCustomerName(e.target.value)}
+                                />
                             </div>
                         </div>
 
@@ -60,21 +105,38 @@ const OrderBooking: React.FC = () => {
                             <Textarea
                                 placeholder="e.g. 50x Red Cotton Sarees for Wedding return gift. Specific contrast border required."
                                 className="min-h-[100px]"
+                                value={description}
+                                onChange={e => setDescription(e.target.value)}
                             />
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="space-y-2">
                                 <Label>Delivery Date</Label>
-                                <Input type="date" />
+                                <Input
+                                    type="date"
+                                    value={deliveryDate}
+                                    onChange={e => setDeliveryDate(e.target.value)}
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Total Estimated (₹)</Label>
-                                <Input type="number" placeholder="0" />
+                                <Input
+                                    type="number"
+                                    placeholder="0"
+                                    value={estimated}
+                                    onChange={e => setEstimated(Number(e.target.value))}
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Advance Paid (₹)</Label>
-                                <Input type="number" placeholder="0" className="border-green-300 bg-green-50" />
+                                <Input
+                                    type="number"
+                                    placeholder="0"
+                                    className="border-green-300 bg-green-50"
+                                    value={advance}
+                                    onChange={e => setAdvance(Number(e.target.value))}
+                                />
                             </div>
                         </div>
 
@@ -103,22 +165,28 @@ const OrderBooking: React.FC = () => {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    <TableRow>
-                                        <TableCell>
-                                            <div className="font-medium">Mrs. Revathi</div>
-                                            <div className="text-xs text-muted-foreground">Order for 50pcs</div>
-                                        </TableCell>
-                                        <TableCell>15-Apr</TableCell>
-                                        <TableCell><Badge>Booked</Badge></TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                        <TableCell>
-                                            <div className="font-medium">Karthik Wedding</div>
-                                            <div className="text-xs text-muted-foreground">Muhurtham silk</div>
-                                        </TableCell>
-                                        <TableCell>20-Mar</TableCell>
-                                        <TableCell><Badge variant="outline" className="text-green-600 bg-green-50">Ready</Badge></TableCell>
-                                    </TableRow>
+                                    {orders.map((order) => (
+                                        <TableRow key={order.id}>
+                                            <TableCell>
+                                                <div className="font-medium">{order.customerName}</div>
+                                                <div className="text-xs text-muted-foreground">{order.description.slice(0, 20)}...</div>
+                                            </TableCell>
+                                            <TableCell>{order.deliveryDate}</TableCell>
+                                            <TableCell>
+                                                <Badge
+                                                    variant="outline"
+                                                    className={order.status === 'Booked' ? 'bg-yellow-50 text-yellow-700' : 'bg-green-50 text-green-700'}
+                                                >
+                                                    {order.status}
+                                                </Badge>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                    {orders.length === 0 && (
+                                        <TableRow>
+                                            <TableCell colSpan={3} className="text-center text-muted-foreground">No recent bookings</TableCell>
+                                        </TableRow>
+                                    )}
                                 </TableBody>
                             </Table>
                         </CardContent>

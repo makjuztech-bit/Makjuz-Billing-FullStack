@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bell, Search, User, LogOut, Building2, Menu } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -19,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 export const TopHeader: React.FC = () => {
   const { user, logout } = useAuth();
   const { t } = useLanguage();
+  const navigate = useNavigate();
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
@@ -41,7 +43,7 @@ export const TopHeader: React.FC = () => {
         <SidebarTrigger className="text-muted-foreground hover:text-foreground">
           <Menu className="h-5 w-5" />
         </SidebarTrigger>
-        
+
         <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -96,7 +98,7 @@ export const TopHeader: React.FC = () => {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate('/profile')}>
               <User className="mr-2 h-4 w-4" />
               Profile
             </DropdownMenuItem>

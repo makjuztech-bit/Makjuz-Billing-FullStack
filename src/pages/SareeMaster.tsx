@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Search,
   Plus,
@@ -20,7 +21,10 @@ import {
   X,
   Check,
 } from 'lucide-react';
+import ReactBarcode from 'react-barcode';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useData } from '@/contexts/DataContext';
+import { Saree } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -127,146 +131,211 @@ const materials = [
   { value: 'crepe', label: 'Crepe Silk', labelTa: 'க்ரேப் சில்க்' },
 ];
 
-interface Saree {
-  id: string;
-  sareeCode: string;
-  barcode: string;
-  name: string;
-  nameTamil: string;
-  category: string;
-  brand: string;
-  material: string;
-  zariType: string;
-  borderType: string;
-  color: string;
-  designType: string;
-  length: string;
-  weight: string;
-  blouseIncluded: boolean;
-  blousePiece: string;
-  purchasePrice: number;
-  sellingPrice: number;
-  mrp: number;
-  gstPercent: number;
-  stockType: 'unique' | 'bulk';
-  stockQty: number;
-  rackLocation: string;
-  supplier: string;
-  images: string[];
-  description: string;
-  status: 'available' | 'sold' | 'reserved' | 'damaged';
-  addedDate: string;
-}
-
-const sampleSarees: Saree[] = [
-  {
-    id: '1',
-    sareeCode: 'KS-2024-001',
-    barcode: '8901234567890',
-    name: 'Kanchipuram Pure Silk - Temple Border',
-    nameTamil: 'காஞ்சிபுரம் தூய பட்டு - கோவில் பார்டர்',
-    category: 'kanchipuram',
-    brand: 'Sri Kumaran',
-    material: 'pure_silk',
-    zariType: 'pure_gold',
-    borderType: 'temple',
-    color: 'maroon',
-    designType: 'bridal',
-    length: '6.3 meters',
-    weight: '850 grams',
-    blouseIncluded: true,
-    blousePiece: '0.8 meters',
-    purchasePrice: 18000,
-    sellingPrice: 22500,
-    mrp: 25000,
-    gstPercent: 5,
-    stockType: 'unique',
-    stockQty: 1,
-    rackLocation: 'A1-01',
-    supplier: 'Kanchipuram Weavers Co-op',
-    images: [],
-    description: 'Premium Kanchipuram silk with pure gold zari temple border, ideal for weddings',
-    status: 'available',
-    addedDate: '2024-01-15',
-  },
-  {
-    id: '2',
-    sareeCode: 'KS-2024-002',
-    barcode: '8901234567891',
-    name: 'Banarasi Silk - Peacock Design',
-    nameTamil: 'பனாரஸ் பட்டு - மயில் டிசைன்',
-    category: 'banarasi',
-    brand: 'Varanasi Silks',
-    material: 'pure_silk',
-    zariType: 'tested_zari',
-    borderType: 'peacock',
-    color: 'green',
-    designType: 'traditional',
-    length: '6.3 meters',
-    weight: '720 grams',
-    blouseIncluded: true,
-    blousePiece: '0.8 meters',
-    purchasePrice: 12000,
-    sellingPrice: 15500,
-    mrp: 18000,
-    gstPercent: 5,
-    stockType: 'unique',
-    stockQty: 1,
-    rackLocation: 'B2-05',
-    supplier: 'Varanasi Handloom',
-    images: [],
-    description: 'Elegant Banarasi silk with intricate peacock motifs',
-    status: 'available',
-    addedDate: '2024-01-18',
-  },
-  {
-    id: '3',
-    sareeCode: 'MS-2024-001',
-    barcode: '8901234567892',
-    name: 'Mysore Silk - Plain Border',
-    nameTamil: 'மைசூர் பட்டு - ப்ளெயின் பார்டர்',
-    category: 'mysore',
-    brand: 'Karnataka Silks',
-    material: 'pure_silk',
-    zariType: 'half_fine',
-    borderType: 'plain',
-    color: 'gold',
-    designType: 'casual',
-    length: '6.3 meters',
-    weight: '550 grams',
-    blouseIncluded: true,
-    blousePiece: '0.8 meters',
-    purchasePrice: 5500,
-    sellingPrice: 7500,
-    mrp: 8500,
-    gstPercent: 5,
-    stockType: 'bulk',
-    stockQty: 5,
-    rackLocation: 'C3-02',
-    supplier: 'Mysore Silk Factory',
-    images: [],
-    description: 'Classic Mysore silk with subtle elegance',
-    status: 'available',
-    addedDate: '2024-01-20',
-  },
+const departments = [
+  { value: 'Saree', label: 'Saree' },
+  { value: 'Mens', label: 'Mens Wear' },
+  { value: 'Kids', label: 'Kids Wear' },
+  { value: 'Womens', label: 'Womens Wear' },
+  { value: 'Other', label: 'Other' },
 ];
 
+// Interface Imported from types
+
+// Sample data removed
+
+
 export const SareeMaster: React.FC = () => {
+  const navigate = useNavigate();
   const { t, language } = useLanguage();
-  const [sarees, setSarees] = useState<Saree[]>(sampleSarees);
+  const { sarees, addSaree, updateSaree } = useData();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [selectedSaree, setSelectedSaree] = useState<Saree | null>(null);
   const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
   const [selectedForPrint, setSelectedForPrint] = useState<string[]>([]);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [printQty, setPrintQty] = useState<number>(1);
 
+  const handleDownloadTemplate = () => {
+    const headers = [
+      'sareeCode',
+      'barcode',
+      'name',
+      'nameTamil',
+      'category',
+      'brand',
+      'material',
+      'zariType',
+      'borderType',
+      'color',
+      'designType',
+      'length',
+      'weight',
+      'blouseIncluded',
+      'blousePiece',
+      'purchasePrice',
+      'sellingPrice',
+      'mrp',
+      'gstPercent',
+      'stockType',
+      'stockQty',
+      'rackLocation',
+      'supplier',
+      'description',
+    ];
+
+    // Create a sample row to help users
+    const sampleRow = [
+      'KS-2024-001', '8901234567890', 'Kanchipuram Silk', 'காஞ்சிபுரம் பட்டு', 'kanchipuram', 'Sri Kumaran', 'pure_silk', 'pure_gold', 'temple', 'maroon', 'bridal', '6.3 meters', '850 grams', 'true', '0.8 meters', '18000', '22500', '25000', '5', 'unique', '1', 'A1-01', 'Kanchipuram Weavers', 'Premium silk saree'
+    ];
+
+    const csvContent = [
+      headers.join(','),
+      sampleRow.join(',')
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'saree_import_template.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      if (!text) return;
+
+      try {
+        const lines = text.split('\n');
+        // Simple CSV parser handling quotes
+        const parseCSVLine = (line: string) => {
+          const result = [];
+          let current = '';
+          let inQuotes = false;
+
+          for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            if (char === '"') {
+              inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+              result.push(current.trim());
+              current = '';
+            } else {
+              current += char;
+            }
+          }
+          result.push(current.trim());
+          return result;
+        };
+
+        const headers = parseCSVLine(lines[0]).map(h => h.trim());
+
+        const newSarees: Saree[] = [];
+
+        // Starting from 1 to skip header
+        for (let i = 1; i < lines.length; i++) {
+          if (!lines[i].trim()) continue;
+
+          const values = parseCSVLine(lines[i]);
+          if (values.length < 5) continue;
+
+          const sareeData: Record<string, string | number | boolean> = {};
+          headers.forEach((header, index) => {
+            let value: string | number | boolean = values[index];
+            // Remove quotes if present
+            if (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) {
+              value = value.substring(1, value.length - 1);
+            }
+
+            if (['purchasePrice', 'sellingPrice', 'mrp', 'gstPercent', 'stockQty'].includes(header)) {
+              value = Number(value) || 0;
+            } else if (header === 'blouseIncluded') {
+              value = String(value).toLowerCase() === 'true';
+            }
+            sareeData[header] = value;
+          });
+
+          // Add default/missing required fields
+          const newSaree: Saree = {
+            id: Date.now().toString() + i,
+            images: [],
+            status: 'available',
+            addedDate: new Date().toISOString().split('T')[0],
+            // Fill defaults for required fields if missing
+            sareeCode: (sareeData.sareeCode as string) || `IMP-${Date.now()}-${i}`,
+            barcode: (sareeData.barcode as string) || `890${Date.now()}${i}`,
+            name: (sareeData.name as string) || 'Imported Saree',
+            nameTamil: (sareeData.nameTamil as string) || '',
+            category: (sareeData.category as string) || 'kanchipuram',
+            brand: (sareeData.brand as string) || '',
+            material: (sareeData.material as string) || 'pure_silk',
+            zariType: (sareeData.zariType as string) || 'pure_gold',
+            borderType: (sareeData.borderType as string) || 'temple',
+            color: (sareeData.color as string) || 'maroon',
+            designType: (sareeData.designType as string) || 'traditional',
+            length: (sareeData.length as string) || '6.3 meters',
+            weight: (sareeData.weight as string) || '',
+            blouseIncluded: (sareeData.blouseIncluded as boolean) ?? true,
+            blousePiece: (sareeData.blousePiece as string) || '0.8 meters',
+            purchasePrice: (sareeData.purchasePrice as number) || 0,
+            sellingPrice: (sareeData.sellingPrice as number) || 0,
+            mrp: (sareeData.mrp as number) || 0,
+            gstPercent: (sareeData.gstPercent as number) || 5,
+            stockType: (sareeData.stockType as any) || 'unique',
+            stockQty: (sareeData.stockQty as number) || 1,
+            rackLocation: (sareeData.rackLocation as string) || '',
+            supplier: (sareeData.supplier as string) || '',
+            description: (sareeData.description as string) || '',
+            ...(sareeData as unknown as Partial<Saree>)
+          };
+
+          newSarees.push(newSaree);
+        }
+
+        if (newSarees.length > 0) {
+          // Bulk add
+          newSarees.forEach(s => addSaree(s));
+          toast.success(`Imported ${newSarees.length} sarees successfully`);
+          setIsImportDialogOpen(false);
+        } else {
+          toast.error('No valid data found in file');
+        }
+      } catch (error) {
+        toast.error('Error parsing CSV file');
+        console.error(error);
+      }
+    };
+    reader.readAsText(file);
+    // Reset input
+    event.target.value = '';
+  };
+
+  const handleEdit = (saree: Saree) => {
+    setFormData({ ...saree });
+    setIsEditing(true);
+    setIsAddDialogOpen(true);
+  };
+
+  // Form state for new/edit saree
   // Form state for new/edit saree
   const [formData, setFormData] = useState<Partial<Saree>>({
     sareeCode: '',
     barcode: '',
+    department: 'Saree',
     name: '',
     nameTamil: '',
     category: 'kanchipuram',
@@ -297,22 +366,51 @@ export const SareeMaster: React.FC = () => {
   };
 
   const generateSareeCode = () => {
-    const prefix = formData.category?.substring(0, 2).toUpperCase() || 'XX';
+    const deptPrefix = formData.department ? formData.department.substring(0, 1).toUpperCase() : 'S';
+    const catPrefix = formData.category?.substring(0, 2).toUpperCase() || 'XX';
     const year = new Date().getFullYear();
     const num = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    setFormData({ ...formData, sareeCode: `${prefix}-${year}-${num}` });
+    setFormData({ ...formData, sareeCode: `${deptPrefix}${catPrefix}-${year}-${num}` });
   };
 
-  const handleSave = () => {
-    if (!formData.name || !formData.barcode || !formData.sareeCode) {
-      toast.error('Please fill required fields');
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const uploadData = new FormData();
+    uploadData.append('image', file);
+
+    try {
+      const res = await fetch('http://localhost:5000/api/upload', {
+        method: 'POST',
+        body: uploadData,
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setFormData(prev => ({ ...prev, images: [...(prev.images || []), data.url] }));
+        toast.success("Image uploaded successfully");
+      } else {
+        toast.error("Upload failed: " + data.message);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Upload failed");
+    }
+  };
+
+  const handleSave = async () => {
+    // If barcode is empty, use sareeCode as barcode
+    const finalBarcode = formData.barcode || formData.sareeCode;
+
+    if (!formData.name || !formData.sareeCode) {
+      toast.error('Please fill required fields (Name and Product Code)');
       return;
     }
 
     const newSaree: Saree = {
-      id: Date.now().toString(),
+      id: isEditing ? (formData.id || '') : Date.now().toString(),
       sareeCode: formData.sareeCode || '',
-      barcode: formData.barcode || '',
+      barcode: finalBarcode || '',
       name: formData.name || '',
       nameTamil: formData.nameTamil || '',
       category: formData.category || 'kanchipuram',
@@ -334,21 +432,87 @@ export const SareeMaster: React.FC = () => {
       stockQty: formData.stockQty || 1,
       rackLocation: formData.rackLocation || '',
       supplier: formData.supplier || '',
-      images: [],
       description: formData.description || '',
-      status: 'available',
-      addedDate: new Date().toISOString().split('T')[0],
+      status: formData.status || 'available',
+      addedDate: formData.addedDate || new Date().toISOString().split('T')[0],
+      images: formData.images || [], // Ensure images are preserved
     };
 
-    setSarees([...sarees, newSaree]);
-    setIsAddDialogOpen(false);
-    toast.success('Saree added successfully!');
-    resetForm();
+    let result = null;
+    if (isEditing && formData.id) {
+      result = await updateSaree(formData.id, newSaree);
+      if (result) setIsEditing(false);
+    } else {
+      result = await addSaree(newSaree);
+    }
+
+    if (result) {
+      setIsAddDialogOpen(false);
+      resetForm();
+    }
   };
 
-  const handleSaveAndPrint = () => {
-    handleSave();
-    toast.success('Barcode tag sent to printer!');
+  const handleSaveAndPrint = async () => {
+    const finalBarcode = formData.barcode || formData.sareeCode;
+
+    if (!formData.name || !formData.sareeCode) {
+      toast.error('Please fill required fields (Name and Product Code)');
+      return;
+    }
+
+    const newId = isEditing ? (formData.id || '') : Date.now().toString();
+    const newSaree: Saree = {
+      id: newId,
+      sareeCode: formData.sareeCode || '',
+      barcode: finalBarcode || '',
+      name: formData.name || '',
+      nameTamil: formData.nameTamil || '',
+      category: formData.category || 'kanchipuram',
+      brand: formData.brand || '',
+      material: formData.material || 'pure_silk',
+      zariType: formData.zariType || 'pure_gold',
+      borderType: formData.borderType || 'temple',
+      color: formData.color || 'maroon',
+      designType: formData.designType || 'traditional',
+      length: formData.length || '6.3 meters',
+      weight: formData.weight || '',
+      blouseIncluded: formData.blouseIncluded ?? true,
+      blousePiece: formData.blousePiece || '',
+      purchasePrice: formData.purchasePrice || 0,
+      sellingPrice: formData.sellingPrice || 0,
+      mrp: formData.mrp || 0,
+      gstPercent: formData.gstPercent || 5,
+      stockType: formData.stockType || 'unique',
+      stockQty: formData.stockQty || 1,
+      rackLocation: formData.rackLocation || '',
+      supplier: formData.supplier || '',
+      description: formData.description || '',
+      status: formData.status || 'available',
+      addedDate: formData.addedDate || new Date().toISOString().split('T')[0],
+      images: formData.images || [],
+    };
+
+    let result = null;
+    if (isEditing && formData.id) {
+      result = await updateSaree(formData.id, newSaree);
+      setIsEditing(false);
+    } else {
+      result = await addSaree(newSaree);
+    }
+
+    if (!result) return; // Don't proceed if it failed
+
+    const finalSaree = result;
+    const finalId = finalSaree.id || finalSaree._id;
+
+    setIsAddDialogOpen(false);
+
+    // Setup print dialog
+    setSelectedForPrint([finalId]);
+    setPrintQty(finalSaree.stockQty || 1);
+    setIsPrintDialogOpen(true);
+
+    resetForm();
   };
 
   const resetForm = () => {
@@ -378,6 +542,7 @@ export const SareeMaster: React.FC = () => {
       supplier: '',
       description: '',
     });
+    setIsEditing(false);
   };
 
   const filteredSarees = sarees.filter((saree) => {
@@ -429,28 +594,53 @@ export const SareeMaster: React.FC = () => {
             {t('nav.products')}
           </h1>
           <p className="mt-1 text-muted-foreground">
-            Manage your saree inventory and product details
+            Manage your inventory and product details
           </p>
         </div>
-        <div className="flex gap-3">
-          <Button variant="outline">
+        <div className="flex flex-wrap gap-3">
+          <Button variant="outline" onClick={() => navigate('/billing')}>
+            <Plus className="mr-2 h-4 w-4" />
+            New Bill
+          </Button>
+          <Button variant="outline" onClick={() => setIsImportDialogOpen(true)}>
             <Upload className="mr-2 h-4 w-4" />
             Import
           </Button>
-          <Button variant="outline">
+          <Button variant="outline" onClick={() => toast.info('Export functionality coming soon')}>
             <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
+          <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Import Sarees</DialogTitle>
+                <DialogDescription>
+                  Upload a CSV file to import saree data. Please use the template format.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="flex flex-col gap-4">
+                  <Button variant="outline" onClick={handleDownloadTemplate} className="w-full">
+                    <Download className="mr-2 h-4 w-4" />
+                    Download Template
+                  </Button>
+                  <div className="grid w-full max-w-sm items-center gap-1.5">
+                    <Label htmlFor="csvFile">Upload CSV</Label>
+                    <Input id="csvFile" type="file" accept=".csv" onChange={handleFileUpload} />
+                  </div>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="gold">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Saree
-              </Button>
-            </DialogTrigger>
+            <Button variant="gold" onClick={() => { resetForm(); setIsEditing(false); setIsAddDialogOpen(true); }}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Product
+            </Button>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background">
               <DialogHeader>
-                <DialogTitle className="font-display text-xl">Add New Saree</DialogTitle>
+                <DialogTitle className="font-display text-xl">{isEditing ? 'Edit Saree' : 'Add New Saree'}</DialogTitle>
                 <DialogDescription>
                   Enter complete details of the saree product
                 </DialogDescription>
@@ -459,39 +649,58 @@ export const SareeMaster: React.FC = () => {
               <Tabs defaultValue="basic" className="w-full">
                 <TabsList className="grid w-full grid-cols-4">
                   <TabsTrigger value="basic">Basic Info</TabsTrigger>
-                  <TabsTrigger value="attributes">Attributes</TabsTrigger>
+                  {(formData.department === 'Saree' || !formData.department) && <TabsTrigger value="attributes">Saree Attributes</TabsTrigger>}
                   <TabsTrigger value="pricing">Pricing</TabsTrigger>
                   <TabsTrigger value="images">Images</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="basic" className="space-y-4 mt-4">
-                  {/* Barcode & Code */}
+
+                  {/* Department & Stock Type */}
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label>Saree Code *</Label>
+                      <Label>Department</Label>
+                      <Select
+                        value={formData.department}
+                        onValueChange={(val: any) => setFormData({ ...formData, department: val })}
+                      >
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {departments.map(d => <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Stock Type</Label>
+                      <Select
+                        value={formData.stockType}
+                        onValueChange={(val: any) => setFormData({ ...formData, stockType: val, stockQty: val === 'unique' ? 1 : formData.stockQty })}
+                      >
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="unique">Unique (Single Piece)</SelectItem>
+                          <SelectItem value="bulk">Bulk (Quantity Based)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-1">
+                    <div className="space-y-2">
+                      <Label>Product Code *</Label>
                       <div className="flex gap-2">
                         <Input
                           value={formData.sareeCode}
                           onChange={(e) => setFormData({ ...formData, sareeCode: e.target.value })}
-                          placeholder="KS-2024-001"
+                          placeholder="Enter or generate code"
                         />
                         <Button variant="outline" size="icon" onClick={generateSareeCode}>
                           <RotateCcw className="h-4 w-4" />
                         </Button>
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Barcode *</Label>
-                      <div className="flex gap-2">
-                        <Input
-                          value={formData.barcode}
-                          onChange={(e) => setFormData({ ...formData, barcode: e.target.value })}
-                          placeholder="8901234567890"
-                        />
-                        <Button variant="outline" size="icon" onClick={generateBarcode}>
-                          <Barcode className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      <p className="text-[10px] text-muted-foreground italic">
+                        The Product Code will be used as the Barcode for scanning and label printing.
+                      </p>
                     </div>
                   </div>
 
@@ -648,11 +857,10 @@ export const SareeMaster: React.FC = () => {
                           key={color.value}
                           type="button"
                           onClick={() => setFormData({ ...formData, color: color.value })}
-                          className={`flex items-center gap-2 rounded-lg border px-3 py-2 transition-all ${
-                            formData.color === color.value
-                              ? 'border-primary bg-primary/10'
-                              : 'border-border hover:border-primary/50'
-                          }`}
+                          className={`flex items-center gap-2 rounded-lg border px-3 py-2 transition-all ${formData.color === color.value
+                            ? 'border-primary bg-primary/10'
+                            : 'border-border hover:border-primary/50'
+                            }`}
                         >
                           <div
                             className="h-4 w-4 rounded-full border"
@@ -824,19 +1032,18 @@ export const SareeMaster: React.FC = () => {
                         </SelectContent>
                       </Select>
                     </div>
-                    {formData.stockType === 'bulk' && (
-                      <div className="space-y-2">
-                        <Label>Quantity</Label>
-                        <Input
-                          type="number"
-                          value={formData.stockQty}
-                          onChange={(e) =>
-                            setFormData({ ...formData, stockQty: Number(e.target.value) })
-                          }
-                          placeholder="10"
-                        />
-                      </div>
-                    )}
+                    <div className="space-y-2">
+                      <Label>Quantity</Label>
+                      <Input
+                        type="number"
+                        value={formData.stockQty}
+                        disabled={formData.stockType === 'unique'}
+                        onChange={(e) =>
+                          setFormData({ ...formData, stockQty: Number(e.target.value) })
+                        }
+                        placeholder="10"
+                      />
+                    </div>
                   </div>
 
                   {/* Location & Supplier */}
@@ -861,29 +1068,44 @@ export const SareeMaster: React.FC = () => {
                 </TabsContent>
 
                 <TabsContent value="images" className="space-y-4 mt-4">
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="rounded-lg border-2 border-dashed border-muted-foreground/30 p-8 text-center">
+                  <div className="grid gap-4">
+                    <div className="rounded-lg border-2 border-dashed border-muted-foreground/30 p-8 text-center relative hover:bg-muted/50 transition-colors">
                       <ImageIcon className="mx-auto h-12 w-12 text-muted-foreground" />
-                      <p className="mt-2 font-medium">Front View</p>
+                      <p className="mt-2 font-medium">Add Image</p>
                       <p className="text-sm text-muted-foreground">
-                        Drag & drop or click to upload
+                        Click to upload
                       </p>
-                      <Button variant="outline" className="mt-4">
-                        <Upload className="mr-2 h-4 w-4" />
-                        Upload Image
-                      </Button>
+                      <Input
+                        type="file"
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        onChange={handleImageUpload}
+                        accept="image/*"
+                      />
                     </div>
-                    <div className="rounded-lg border-2 border-dashed border-muted-foreground/30 p-8 text-center">
-                      <ImageIcon className="mx-auto h-12 w-12 text-muted-foreground" />
-                      <p className="mt-2 font-medium">Close-up / Pallu</p>
-                      <p className="text-sm text-muted-foreground">
-                        Drag & drop or click to upload
-                      </p>
-                      <Button variant="outline" className="mt-4">
-                        <Upload className="mr-2 h-4 w-4" />
-                        Upload Image
-                      </Button>
-                    </div>
+                    {/* Uploaded Images Preview */}
+                    {formData.images && formData.images.length > 0 && (
+                      <div className="grid grid-cols-4 gap-4 mt-4">
+                        {formData.images.map((img, i) => (
+                          <div key={i} className="relative group">
+                            <img
+                              src={img}
+                              alt={`Uploaded ${i + 1}`}
+                              className="h-24 w-full object-cover rounded-lg border"
+                            />
+                            <button
+                              className="absolute top-1 right-1 bg-destructive text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => {
+                                const newImages = [...(formData.images || [])];
+                                newImages.splice(i, 1);
+                                setFormData({ ...formData, images: newImages });
+                              }}
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </TabsContent>
               </Tabs>
@@ -973,8 +1195,8 @@ export const SareeMaster: React.FC = () => {
                 <Package className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{sarees.length}</p>
-                <p className="text-sm text-muted-foreground">Total Products</p>
+                <p className="text-2xl font-bold">{sarees.reduce((sum, s) => sum + (s.stockQty || 0), 0)}</p>
+                <p className="text-sm text-muted-foreground">Total Items</p>
               </div>
             </div>
           </CardContent>
@@ -987,7 +1209,7 @@ export const SareeMaster: React.FC = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">
-                  {sarees.filter((s) => s.status === 'available').length}
+                  {sarees.filter((s) => s.status === 'available').reduce((sum, s) => sum + (s.stockQty || 0), 0)}
                 </p>
                 <p className="text-sm text-muted-foreground">Available</p>
               </div>
@@ -1002,7 +1224,7 @@ export const SareeMaster: React.FC = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">
-                  ₹{sarees.reduce((sum, s) => sum + s.sellingPrice * s.stockQty, 0).toLocaleString()}
+                  ₹{sarees.reduce((sum, s) => sum + (s.purchasePrice || 0) * (s.stockQty || 0), 0).toLocaleString()}
                 </p>
                 <p className="text-sm text-muted-foreground">Stock Value</p>
               </div>
@@ -1123,7 +1345,7 @@ export const SareeMaster: React.FC = () => {
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(saree)}>
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
@@ -1215,60 +1437,81 @@ export const SareeMaster: React.FC = () => {
           <DialogHeader>
             <DialogTitle className="font-display text-xl">Print Barcode Tags</DialogTitle>
             <DialogDescription>
-              Preview and print barcode tags for selected sarees
+              Preview and print barcode tags for selected items
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="rounded-lg border bg-white p-4">
-              <p className="text-sm text-muted-foreground mb-2">Tag Preview (Thermal 50x25mm)</p>
+          <div className="space-y-6">
+            <div className="rounded-xl border bg-white p-6 shadow-inner flex justify-center">
               {selectedForPrint.length > 0 && (
-                <div className="border-2 border-dashed border-muted-foreground/30 p-3 text-center">
-                  <p className="font-bold text-sm">
-                    {sarees.find((s) => s.id === selectedForPrint[0])?.name}
-                  </p>
-                  <div className="my-2 flex justify-center">
-                    <div className="h-8 w-32 bg-[repeating-linear-gradient(90deg,#000,#000_2px,transparent_2px,transparent_4px)]" />
-                  </div>
-                  <p className="font-mono text-xs">
-                    {sarees.find((s) => s.id === selectedForPrint[0])?.barcode}
-                  </p>
-                  <p className="mt-1 font-bold">
-                    ₹{sarees.find((s) => s.id === selectedForPrint[0])?.sellingPrice.toLocaleString()}
-                  </p>
-                </div>
+                (() => {
+                  const s = sarees.find((s) => s.id === selectedForPrint[0]);
+                  if (!s) return null;
+                  return (
+                    <div className="w-[50mm] min-h-[25mm] border border-gray-400 p-2 text-center flex flex-col items-center justify-center bg-white text-black">
+                      <p className="font-bold text-[10px] uppercase tracking-tight truncate w-full">MY SILK STORE</p>
+                      <p className="text-[9px] truncate w-full">{s.name}</p>
+                      <div className="my-1">
+                        <ReactBarcode
+                          value={s.barcode}
+                          width={1.2}
+                          height={30}
+                          fontSize={10}
+                          margin={0}
+                        />
+                      </div>
+                      <div className="flex justify-between w-full px-2 mt-1">
+                        <span className="text-[10px] font-bold">₹{s.sellingPrice.toLocaleString()}</span>
+                        <span className="text-[10px] font-mono">{s.sareeCode}</span>
+                      </div>
+                    </div>
+                  );
+                })()
               )}
             </div>
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                {selectedForPrint.length} tag(s) selected
-              </p>
-              <Select defaultValue="1">
-                <SelectTrigger className="w-32">
-                  <SelectValue placeholder="Copies" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover">
-                  <SelectItem value="1">1 copy</SelectItem>
-                  <SelectItem value="2">2 copies</SelectItem>
-                  <SelectItem value="3">3 copies</SelectItem>
-                  <SelectItem value="5">5 copies</SelectItem>
-                </SelectContent>
-              </Select>
+
+            <div className="grid gap-4 p-4 bg-muted/30 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Print Quantity</Label>
+                  <p className="text-xs text-muted-foreground">Total labels to generate</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="number"
+                    className="w-20 text-center font-bold"
+                    value={printQty}
+                    onChange={e => setPrintQty(Math.max(1, Number(e.target.value)))}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Selected Item</Label>
+                  <p className="text-xs text-muted-foreground">
+                    {selectedForPrint.length > 0
+                      ? sarees.find(s => s.id === selectedForPrint[0])?.name.substring(0, 30) + '...'
+                      : 'None'}
+                  </p>
+                </div>
+                <Badge variant="secondary">Item 1 of {selectedForPrint.length}</Badge>
+              </div>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsPrintDialogOpen(false)}>
-              Cancel
+              Close
             </Button>
             <Button
               variant="gold"
               onClick={() => {
-                toast.success(`${selectedForPrint.length} barcode tag(s) sent to printer!`);
+                toast.success(`Sent ${printQty} label(s) to barcode printer!`);
                 setIsPrintDialogOpen(false);
                 setSelectedForPrint([]);
               }}
             >
               <Printer className="mr-2 h-4 w-4" />
-              Print Tags
+              Start Printing
             </Button>
           </DialogFooter>
         </DialogContent>

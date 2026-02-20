@@ -25,27 +25,71 @@ import {
 } from '@/components/ui/table';
 import { toast } from 'sonner';
 
-interface AlterationJob {
-    id: string;
-    customer: string;
-    mobile: string;
-    items: string; // concise description
-    services: string[]; // e.g. Fall, Pico, Blouse
-    status: 'Pending' | 'In Progress' | 'Ready' | 'Delivered';
-    deliveryDate: string;
-    amount: number;
-}
-
-const mockJobs: AlterationJob[] = [
-    { id: 'JOB-101', customer: 'Deepa', mobile: '9988776655', items: '1x Kanchi Silk', services: ['Fall', 'Pico', 'Blouse Stitching'], status: 'In Progress', deliveryDate: '2024-03-25', amount: 850 },
-    { id: 'JOB-102', customer: 'Sujatha', mobile: '9876543210', items: '2x Cotton', services: ['Fall', 'Pico'], status: 'Ready', deliveryDate: '2024-03-22', amount: 300 },
-];
+import { useData } from '@/contexts/DataContext';
+import { AlterationJob } from '@/types';
 
 const AlterationService: React.FC = () => {
-    const [jobs, setJobs] = useState<AlterationJob[]>(mockJobs);
+    const { alterations, addAlteration, updateAlteration } = useData();
+
+    // Form State
+    const [customerMobile, setCustomerMobile] = useState('');
+    const [customerName, setCustomerName] = useState('');
+    const [itemsDesc, setItemsDesc] = useState('');
+    const [selectedServices, setSelectedServices] = useState<string[]>([]);
+    const [deliveryDate, setDeliveryDate] = useState('');
+    const [amount, setAmount] = useState(0);
+
+    const handleServiceToggle = (service: string) => {
+        setSelectedServices(prev =>
+            prev.includes(service) ? prev.filter(s => s !== service) : [...prev, service]
+        );
+    };
+
+    const handleCreateJob = () => {
+        if (!customerMobile || !itemsDesc || selectedServices.length === 0) {
+            toast.error('Please fill all required details');
+            return;
+        }
+
+        const newJob: AlterationJob = {
+            id: `JOB-${Date.now().toString().slice(-4)}`,
+            customer: customerName || 'Walk-in',
+            mobile: customerMobile,
+            items: itemsDesc,
+            services: selectedServices,
+            status: 'Pending',
+            deliveryDate: deliveryDate || new Date(Date.now() + 86400000).toISOString().split('T')[0],
+            amount: amount || 0
+        };
+
+        addAlteration(newJob);
+        toast.success(`Job Ticket ${newJob.id} Created`);
+
+        // Reset Form
+        setCustomerMobile('');
+        setCustomerName('');
+        setItemsDesc('');
+        setSelectedServices([]);
+        setDeliveryDate('');
+        setAmount(0);
+    };
 
     const handleStatusChange = (id: string) => {
-        toast.success('Status updated and SMS sent to customer');
+        const job = alterations.find(j => j.id === id);
+        if (!job) return;
+
+        const nextStatus: Record<string, AlterationJob['status']> = {
+            'Pending': 'In Progress',
+            'In Progress': 'Ready',
+            'Ready': 'Delivered',
+            'Delivered': 'Delivered'
+        };
+
+        const newStatus = nextStatus[job.status];
+        if (newStatus && newStatus !== job.status) {
+            updateAlteration(id, { status: newStatus });
+            toast.success(`Job status updated to ${newStatus}`);
+        }
     };
 
     const handlePrint = (id: string) => {
@@ -74,52 +118,68 @@ const AlterationService: React.FC = () => {
                                 <Label>Customer Mobile</Label>
                                 <div className="relative">
                                     <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                                    <Input placeholder="Search or Enter Mobile" className="pl-9" />
+                                    <Input
+                                        placeholder="Search or Enter Mobile"
+                                        className="pl-9"
+                                        value={customerMobile}
+                                        onChange={e => setCustomerMobile(e.target.value)}
+                                    />
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <Label>Customer Name</Label>
-                                <Input placeholder="Name" />
+                                <Input
+                                    placeholder="Name"
+                                    value={customerName}
+                                    onChange={e => setCustomerName(e.target.value)}
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Saree / Item Details</Label>
-                                <Input placeholder="e.g. Red Kanchipuram" />
+                                <Input
+                                    placeholder="e.g. Red Kanchipuram"
+                                    value={itemsDesc}
+                                    onChange={e => setItemsDesc(e.target.value)}
+                                />
                             </div>
 
                             <div className="space-y-3 pt-2">
                                 <Label>Services Required</Label>
                                 <div className="grid grid-cols-2 gap-3">
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox id="s1" />
-                                        <label htmlFor="s1" className="text-sm font-medium">Fall + Pico</label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox id="s2" />
-                                        <label htmlFor="s2" className="text-sm font-medium">Blouse Stitch</label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox id="s3" />
-                                        <label htmlFor="s3" className="text-sm font-medium">Aari Work</label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox id="s4" />
-                                        <label htmlFor="s4" className="text-sm font-medium">Polishing</label>
-                                    </div>
+                                    {['Fall + Pico', 'Blouse Stitch', 'Aari Work', 'Polishing'].map((service) => (
+                                        <div key={service} className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id={service}
+                                                checked={selectedServices.includes(service)}
+                                                onCheckedChange={() => handleServiceToggle(service)}
+                                            />
+                                            <label htmlFor={service} className="text-sm font-medium">{service}</label>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label>Est. Delivery</Label>
-                                    <Input type="date" />
+                                    <Input
+                                        type="date"
+                                        value={deliveryDate}
+                                        onChange={e => setDeliveryDate(e.target.value)}
+                                    />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Charges (₹)</Label>
-                                    <Input type="number" placeholder="0" />
+                                    <Input
+                                        type="number"
+                                        placeholder="0"
+                                        value={amount}
+                                        onChange={e => setAmount(Number(e.target.value))}
+                                    />
                                 </div>
                             </div>
 
-                            <Button className="w-full mt-2">Create Job Ticket</Button>
+                            <Button className="w-full mt-2" onClick={handleCreateJob}>Create Job Ticket</Button>
                         </CardContent>
                     </Card>
                 </div>
@@ -130,7 +190,7 @@ const AlterationService: React.FC = () => {
                         <CardHeader className="border-b pb-3">
                             <div className="flex justify-between items-center">
                                 <CardTitle>Active Jobs</CardTitle>
-                                <Badge variant="secondary">{jobs.length} Active</Badge>
+                                <Badge variant="secondary">{alterations.length} Active</Badge>
                             </div>
                         </CardHeader>
                         <CardContent className="p-0 flex-1">
@@ -146,7 +206,7 @@ const AlterationService: React.FC = () => {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {jobs.map((job) => (
+                                    {alterations.map((job) => (
                                         <TableRow key={job.id}>
                                             <TableCell className="font-mono text-xs">{job.id}</TableCell>
                                             <TableCell>
