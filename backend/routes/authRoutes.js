@@ -43,13 +43,13 @@ router.post('/seed', async (req, res) => {
         if (!admin) {
             admin = new User({
                 username: 'admin',
-                password: 'demo123',
+                password: 'vvcollection123',
                 name: 'Admin User',
                 role: 'admin'
             });
         } else {
             // Update password to ensure it is hashed (triggers pre-save hook)
-            admin.password = 'demo123';
+            admin.password = 'vvcollection123';
         }
 
         await admin.save();
