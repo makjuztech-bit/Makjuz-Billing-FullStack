@@ -69,35 +69,32 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 
-// Saree attribute options
+// Jewelry attribute options
 const categories = [
-  { value: 'kanchipuram', label: 'Kanchipuram Silk', labelTa: 'காஞ்சிபுரம் பட்டு' },
-  { value: 'banarasi', label: 'Banarasi Silk', labelTa: 'பனாரஸ் பட்டு' },
-  { value: 'mysore', label: 'Mysore Silk', labelTa: 'மைசூர் பட்டு' },
-  { value: 'chanderi', label: 'Chanderi Silk', labelTa: 'சந்தேரி பட்டு' },
-  { value: 'tussar', label: 'Tussar Silk', labelTa: 'துஸ்ஸர் பட்டு' },
-  { value: 'patola', label: 'Patola Silk', labelTa: 'பட்டோலா பட்டு' },
-  { value: 'paithani', label: 'Paithani Silk', labelTa: 'பைதானி பட்டு' },
-  { value: 'cotton', label: 'Cotton Silk', labelTa: 'காட்டன் பட்டு' },
+  { value: 'bridal', label: 'Bridal', labelTa: 'மணப்பெண்' },
+  { value: 'daily', label: 'Daily Wear', labelTa: 'தினசரி' },
+  { value: 'party', label: 'Party Wear', labelTa: 'பார்ட்டி' },
+  { value: 'traditional', label: 'Traditional', labelTa: 'பாரம்பரிய' },
+  { value: 'modern', label: 'Modern', labelTa: 'நவீன' },
+  { value: 'wedding', label: 'Wedding', labelTa: 'திருமணம்' },
 ];
 
 const zariTypes = [
-  { value: 'pure_gold', label: 'Pure Gold Zari', labelTa: 'தூய தங்க ஜரி' },
-  { value: 'pure_silver', label: 'Pure Silver Zari', labelTa: 'தூய வெள்ளி ஜரி' },
-  { value: 'tested_zari', label: 'Tested Zari', labelTa: 'டெஸ்டட் ஜரி' },
-  { value: 'half_fine', label: 'Half Fine Zari', labelTa: 'ஹாஃப் ஃபைன் ஜரி' },
-  { value: 'imitation', label: 'Imitation Zari', labelTa: 'இமிடேஷன் ஜரி' },
-  { value: 'copper', label: 'Copper Zari', labelTa: 'காப்பர் ஜரி' },
+  { value: 'pure_gold', label: 'Pure Gold', labelTa: 'தூய தங்கம்' },
+  { value: 'gold_plated', label: 'Gold Plated', labelTa: 'தங்க பூசப்பட்ட' },
+  { value: 'silver', label: 'Silver', labelTa: 'வெள்ளி' },
+  { value: 'diamond', label: 'Diamond', labelTa: 'வைர' },
+  { value: 'stone', label: 'Stone Set', labelTa: 'கல் அமைப்பு' },
+  { value: 'pearl', label: 'Pearl', labelTa: 'முத்து' },
 ];
 
 const borderTypes = [
-  { value: 'temple', label: 'Temple Border', labelTa: 'கோவில் பார்டர்' },
-  { value: 'peacock', label: 'Peacock Border', labelTa: 'மயில் பார்டர்' },
-  { value: 'mango', label: 'Mango Border', labelTa: 'மாங்காய் பார்டர்' },
-  { value: 'checks', label: 'Checks Border', labelTa: 'செக்ஸ் பார்டர்' },
-  { value: 'plain', label: 'Plain Border', labelTa: 'ப்ளெயின் பார்டர்' },
-  { value: 'contrast', label: 'Contrast Border', labelTa: 'கான்ட்ராஸ்ட் பார்டர்' },
-  { value: 'heavy', label: 'Heavy Border', labelTa: 'ஹெவி பார்டர்' },
+  { value: 'classic', label: 'Classic', labelTa: 'கிளாசிக்' },
+  { value: 'filigree', label: 'Filigree', labelTa: 'ஃபிலிகிரி' },
+  { value: 'minimal', label: 'Minimal', labelTa: 'குறைந்தபட்ச' },
+  { value: 'stone', label: 'Stone Work', labelTa: 'கல் வேலை' },
+  { value: 'textured', label: 'Textured', labelTa: 'உருவமைப்பு' },
+  { value: 'custom', label: 'Custom', labelTa: 'தனிப்பயன்' },
 ];
 
 const designTypes = [
@@ -105,7 +102,7 @@ const designTypes = [
   { value: 'contemporary', label: 'Contemporary', labelTa: 'நவீன' },
   { value: 'bridal', label: 'Bridal', labelTa: 'மணப்பெண்' },
   { value: 'party', label: 'Party Wear', labelTa: 'பார்ட்டி வேர்' },
-  { value: 'casual', label: 'Casual', labelTa: 'கேஷுவல்' },
+  { value: 'daily', label: 'Daily Wear', labelTa: 'தினசரி' },
   { value: 'festive', label: 'Festive', labelTa: 'பண்டிகை' },
 ];
 
@@ -125,15 +122,16 @@ const colors = [
 ];
 
 const materials = [
-  { value: 'pure_silk', label: 'Pure Silk', labelTa: 'தூய பட்டு' },
-  { value: 'art_silk', label: 'Art Silk', labelTa: 'ஆர்ட் சில்க்' },
-  { value: 'silk_cotton', label: 'Silk Cotton', labelTa: 'பட்டு காட்டன்' },
-  { value: 'organza', label: 'Organza Silk', labelTa: 'ஆர்கன்சா' },
-  { value: 'crepe', label: 'Crepe Silk', labelTa: 'க்ரேப் சில்க்' },
+  { value: 'gold', label: 'Gold', labelTa: 'தங்கம்' },
+  { value: 'silver', label: 'Silver', labelTa: 'வெள்ளி' },
+  { value: 'diamond', label: 'Diamond', labelTa: 'வைர' },
+  { value: 'pearl', label: 'Pearl', labelTa: 'முத்து' },
+  { value: 'stone', label: 'Stone Set', labelTa: 'கல் அமைப்பு' },
+  { value: 'mixed', label: 'Mixed Metal', labelTa: 'கலப்பு உலோகம்' },
 ];
 
 const departments = [
-  { value: 'Saree', label: 'Saree' },
+  { value: 'Jewelry', label: 'Jewelry' },
   { value: 'Mens', label: 'Mens Wear' },
   { value: 'Kids', label: 'Kids Wear' },
   { value: 'Womens', label: 'Womens Wear' },
@@ -336,7 +334,7 @@ export const SareeMaster: React.FC = () => {
   const [formData, setFormData] = useState<Partial<Saree>>({
     sareeCode: '',
     barcode: '',
-    department: 'Saree',
+    department: 'Jewelry',
     name: '',
     nameTamil: '',
     category: 'kanchipuram',
@@ -708,19 +706,19 @@ export const SareeMaster: React.FC = () => {
                   {/* Names */}
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label>Saree Name (English) *</Label>
+                      <Label>Jewelry Name (English) *</Label>
                       <Input
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="Kanchipuram Pure Silk - Temple Border"
+                        placeholder="Diamond Pendant - Bridal Set"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="font-tamil">சேலை பெயர் (தமிழ்)</Label>
+                      <Label className="font-tamil">நகை பெயர் (தமிழ்)</Label>
                       <Input
                         value={formData.nameTamil}
                         onChange={(e) => setFormData({ ...formData, nameTamil: e.target.value })}
-                        placeholder="காஞ்சிபுரம் தூய பட்டு"
+                        placeholder="வைர மாலை - மணப்பெண் செட்"
                         className="font-tamil"
                       />
                     </div>
@@ -751,7 +749,7 @@ export const SareeMaster: React.FC = () => {
                       <Input
                         value={formData.brand}
                         onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                        placeholder="Sri Kumaran Silks"
+                        placeholder="Royal Jewels"
                       />
                     </div>
                   </div>
@@ -762,7 +760,7 @@ export const SareeMaster: React.FC = () => {
                     <Textarea
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      placeholder="Detailed description of the saree..."
+                      placeholder="Detailed description of the jewelry piece..."
                       rows={3}
                     />
                   </div>
@@ -908,9 +906,9 @@ export const SareeMaster: React.FC = () => {
                   <div className="rounded-lg border p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium">Blouse Piece Included</p>
+                        <p className="font-medium">Certificate Included</p>
                         <p className="text-sm text-muted-foreground">
-                          Does this saree come with blouse material?
+                          Does this jewelry item include a certificate?
                         </p>
                       </div>
                       <Switch

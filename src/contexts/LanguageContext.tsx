@@ -15,7 +15,7 @@ const translations: Record<string, Record<Language, string>> = {
   'nav.billHistory': { en: 'Bill History', ta: 'பில் வரலாறு' },
   'nav.holdBills': { en: 'Hold Bills', ta: 'நிறுத்தப்பட்ட பில்' },
   'nav.customers': { en: 'Customers', ta: 'வாடிக்கையாளர்கள்' },
-  'nav.products': { en: 'Product Master', ta: 'தயாரிப்பு மாஸ்டர்' },
+  'nav.products': { en: 'Jewelry Master', ta: 'நகை மாஸ்டர்' },
   'nav.inventory': { en: 'Inventory', ta: 'கையிருப்பு' },
   'nav.stockAdjust': { en: 'Stock Adjustment', ta: 'கையிருப்பு சரிசெய்' },
   'nav.purchase': { en: 'Purchase Entry', ta: 'வாங்கல் பதிவு' },
@@ -73,7 +73,7 @@ const translations: Record<string, Record<Language, string>> = {
   'billing.customer': { en: 'Customer', ta: 'வாடிக்கையாளர்' },
   'billing.mobile': { en: 'Mobile', ta: 'மொபைல்' },
   'billing.scanBarcode': { en: 'Scan Barcode', ta: 'பார்கோடு ஸ்கேன்' },
-  'billing.addSaree': { en: 'Add Saree', ta: 'சேலை சேர்' },
+  'billing.addSaree': { en: 'Add Jewelry Item', ta: 'நகை பொருள் சேர்' },
   'billing.subtotal': { en: 'Subtotal', ta: 'உப மொத்தம்' },
   'billing.discount': { en: 'Discount', ta: 'தள்ளுபடி' },
   'billing.gst': { en: 'GST', ta: 'GST' },
@@ -93,7 +93,7 @@ const translations: Record<string, Record<Language, string>> = {
   'login.otp': { en: 'Login with OTP', ta: 'OTP உள்நுழைவு' },
 
   // Setup
-  'setup.welcome': { en: 'Welcome to vv collection POS', ta: 'vv collection POS வரவேற்பு' },
+  'setup.welcome': { en: 'Welcome to Jewelry POS', ta: 'நகை POS வரவேற்பு' },
   'setup.companyInfo': { en: 'Company Information', ta: 'நிறுவன தகவல்' },
   'setup.gstSettings': { en: 'GST Settings', ta: 'GST அமைப்புகள்' },
   'setup.billingSettings': { en: 'Billing Settings', ta: 'பில்லிங் அமைப்புகள்' },

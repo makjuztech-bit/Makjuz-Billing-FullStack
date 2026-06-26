@@ -5,7 +5,7 @@ export interface Saree {
     name: string;
     nameTamil: string;
     category: string;
-    department?: 'Saree' | 'Mens' | 'Kids' | 'Womens' | 'Other';
+    department?: 'Jewelry' | 'Mens' | 'Kids' | 'Womens' | 'Other';
     brand: string;
     material: string;
     zariType: string;

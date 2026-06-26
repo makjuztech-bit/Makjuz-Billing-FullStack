@@ -258,7 +258,7 @@ export const Login: React.FC = () => {
 
       {/* Footer */}
       <footer className="py-4 text-center text-sm text-muted-foreground">
-        © 2024 Silk Saree POS. All rights reserved.
+        © 2024 Jewelry POS. All rights reserved.
       </footer>
     </div>
   );

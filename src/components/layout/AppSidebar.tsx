@@ -148,9 +148,9 @@ export const AppSidebar: React.FC = () => {
           {!collapsed && (
             <div className="flex flex-col">
               <span className="font-display text-lg font-semibold text-sidebar-foreground">
-                vv collection
+                Jewelry POS
               </span>
-              <span className="text-xs text-sidebar-foreground/70">POS System</span>
+              <span className="text-xs text-sidebar-foreground/70">Luxury Collection</span>
             </div>
           )}
         </div>

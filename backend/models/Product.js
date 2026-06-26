@@ -6,7 +6,7 @@ const productSchema = new mongoose.Schema({
     name: { type: String, required: true },
     nameTamil: { type: String },
     category: { type: String, required: true },
-    department: { type: String, enum: ['Saree', 'Mens', 'Kids', 'Womens', 'Other'], default: 'Saree' }, // Department/Type
+    department: { type: String, enum: ['Jewelry', 'Mens', 'Kids', 'Womens', 'Other'], default: 'Jewelry' }, // Department/Type
     brand: { type: String },
     material: { type: String },
     color: { type: String },

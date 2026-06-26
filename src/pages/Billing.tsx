@@ -84,9 +84,9 @@ interface ExtraService {
 }
 
 const extraServices: ExtraService[] = [
-  { id: 'fallpico', name: 'Fall + Pico', nameTamil: 'ஃபால் + பிகோ', price: 250, enabled: false },
-  { id: 'blouse', name: 'Blouse Stitching', nameTamil: 'பிளவுஸ் தையல்', price: 500, enabled: false },
-  { id: 'aari', name: 'Aari Work', nameTamil: 'ஆரி வேலை', price: 1500, enabled: false },
+  { id: 'polishing', name: 'Polishing', nameTamil: 'பளபளப்பு', price: 180, enabled: false },
+  { id: 'certification', name: 'Certification', nameTamil: 'சான்றிதழ்', price: 300, enabled: false },
+  { id: 'engraving', name: 'Engraving', nameTamil: 'குறிப்பெழுத்து', price: 220, enabled: false },
   { id: 'gift', name: 'Gift Packing', nameTamil: 'பரிசு பேக்கிங்', price: 150, enabled: false },
 ];
 
@@ -512,7 +512,7 @@ export const Billing: React.FC = () => {
                 <Input
                   ref={barcodeInputRef}
                   autoFocus
-                  placeholder={t('billing.scanBarcode') + ' / Saree Code'}
+                  placeholder={t('billing.scanBarcode') + ' / Product Code'}
                   value={barcodeInput}
                   onChange={(e) => setBarcodeInput(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleBarcodeSearch()}
@@ -538,7 +538,7 @@ export const Billing: React.FC = () => {
               <TableHeader>
                 <TableRow className="bg-muted/50">
                   <TableHead className="w-[100px]">Code</TableHead>
-                  <TableHead>Saree Details</TableHead>
+                  <TableHead>Jewelry Details</TableHead>
                   <TableHead className="text-center">Blouse</TableHead>
                   <TableHead className="text-right">MRP</TableHead>
                   <TableHead className="text-right">Price</TableHead>
@@ -611,7 +611,7 @@ export const Billing: React.FC = () => {
                 {items.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
-                      Scan barcode or search saree to add items
+                      Scan barcode or search jewelry to add items
                     </TableCell>
                   </TableRow>
                 )}

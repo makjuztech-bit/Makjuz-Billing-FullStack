@@ -305,7 +305,7 @@ export const SetupWizard: React.FC = () => {
             </div>
 
             <div className="space-y-3">
-              <Label>Saree Stock Type</Label>
+              <Label>Jewelry Stock Type</Label>
               <RadioGroup value={stockType} onValueChange={setStockType}>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div
@@ -322,7 +322,7 @@ export const SetupWizard: React.FC = () => {
                       </Label>
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Each saree has unique barcode
+                      Each jewelry item has a unique barcode
                     </p>
                   </div>
                   <div
@@ -582,7 +582,7 @@ export const SetupWizard: React.FC = () => {
             <div>
               <h3 className="text-2xl font-bold">Setup Complete!</h3>
               <p className="mt-2 text-muted-foreground">
-                Your Silk Saree POS system is ready to use
+                Your Jewelry POS system is ready to use
               </p>
             </div>
             <Card className="text-left">
@@ -637,7 +637,7 @@ export const SetupWizard: React.FC = () => {
               Setup Wizard
             </h1>
             <p className="mt-2 text-muted-foreground">
-              Configure your Silk Saree POS system
+              Configure your Jewelry POS system
             </p>
           </div>
 
