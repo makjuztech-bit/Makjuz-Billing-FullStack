@@ -113,10 +113,10 @@ export const Login: React.FC = () => {
               <Store className="h-10 w-10 text-primary-foreground" />
             </div>
             <h1 className="font-display text-3xl font-bold text-foreground">
-              vv collection POS
+              Durgas Billing System
             </h1>
             <p className="mt-2 text-muted-foreground">
-              Premium Billing System for Silk Showrooms
+              Premium Billing System for Jewelry Collections
             </p>
           </div>
 

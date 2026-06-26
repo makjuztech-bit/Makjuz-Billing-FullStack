@@ -51,7 +51,7 @@ app.use('/api/settings', require('./routes/settingsRoutes'));
 app.use('/api/migration', require('./routes/migrationRoutes'));
 
 app.get('/', (req, res) => {
-    res.send('vv collection API is running');
+    res.send('Durgas Billing API is running');
 });
 
 // Create uploads directory if using local storage temporarily, but we use Cloudinary

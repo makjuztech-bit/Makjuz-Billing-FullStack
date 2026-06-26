@@ -93,7 +93,7 @@ const translations: Record<string, Record<Language, string>> = {
   'login.otp': { en: 'Login with OTP', ta: 'OTP உள்நுழைவு' },
 
   // Setup
-  'setup.welcome': { en: 'Welcome to Jewelry POS', ta: 'நகை POS வரவேற்பு' },
+  'setup.welcome': { en: 'Welcome to Durgas Billing System', ta: 'துர்காஸ் பில்லிங் சிஸ்டம் வரவேற்பு' },
   'setup.companyInfo': { en: 'Company Information', ta: 'நிறுவன தகவல்' },
   'setup.gstSettings': { en: 'GST Settings', ta: 'GST அமைப்புகள்' },
   'setup.billingSettings': { en: 'Billing Settings', ta: 'பில்லிங் அமைப்புகள்' },
