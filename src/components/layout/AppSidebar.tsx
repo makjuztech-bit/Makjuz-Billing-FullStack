@@ -13,7 +13,6 @@ import {
   Truck,
   RotateCcw,
   ArrowLeftRight,
-  Scissors,
   CalendarCheck,
   CreditCard,
   DollarSign,
@@ -24,7 +23,6 @@ import {
   Settings,
   Shield,
   Database,
-  Palette,
   ChevronDown,
   Store,
   Barcode,
@@ -99,7 +97,6 @@ const navGroups: NavGroup[] = [
     label: 'Sales',
     items: [
       { title: 'Returns/Exchange', titleKey: 'nav.returns', url: '/returns', icon: ArrowLeftRight },
-      { title: 'Alterations', titleKey: 'nav.alterations', url: '/alterations', icon: Scissors },
       { title: 'Order Booking', titleKey: 'nav.orders', url: '/orders', icon: CalendarCheck },
     ],
   },
@@ -125,7 +122,6 @@ const navGroups: NavGroup[] = [
       { title: 'Users & Roles', titleKey: 'nav.users', url: '/settings', icon: Shield },
       { title: 'Data Backup', titleKey: 'nav.backup', url: '/backup', icon: Database },
       { title: 'Smart Migration', titleKey: 'nav.migration', url: '/migration', icon: RotateCcw },
-      { title: 'Customization', titleKey: 'nav.customize', url: '/admin-customization', icon: Palette },
     ],
   },
 ];

@@ -296,7 +296,7 @@ const PurchaseEntry: React.FC = () => {
                                         <div className="space-y-2 md:col-span-2 lg:col-span-3">
                                             <Label>Product Name</Label>
                                             <Input
-                                                placeholder="Enter saree Name / Description"
+                                                placeholder="Enter jewel name / description"
                                                 value={itemName}
                                                 onChange={(e) => setItemName(e.target.value)}
                                             />
@@ -308,9 +308,10 @@ const PurchaseEntry: React.FC = () => {
                                                     <SelectValue placeholder="Select Category" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="Silk">Silk</SelectItem>
-                                                    <SelectItem value="Cotton">Cotton</SelectItem>
-                                                    <SelectItem value="Fancy">Fancy</SelectItem>
+                                                    <SelectItem value="Gold">Gold</SelectItem>
+                                                    <SelectItem value="Diamond">Diamond</SelectItem>
+                                                    <SelectItem value="Silver">Silver</SelectItem>
+                                                    <SelectItem value="Stone">Stone</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>

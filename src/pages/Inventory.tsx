@@ -161,10 +161,10 @@ const Inventory: React.FC = () => {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="all">All Categories</SelectItem>
-                                    <SelectItem value="Silk">Silk</SelectItem>
-                                    <SelectItem value="Soft Silk">Soft Silk</SelectItem>
-                                    <SelectItem value="Cotton">Cotton</SelectItem>
-                                    <SelectItem value="Fancy">Fancy</SelectItem>
+                                    <SelectItem value="Gold">Gold</SelectItem>
+                                    <SelectItem value="Diamond">Diamond</SelectItem>
+                                    <SelectItem value="Silver">Silver</SelectItem>
+                                    <SelectItem value="Stone">Stone</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -286,10 +286,10 @@ const Inventory: React.FC = () => {
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="Silk">Silk</SelectItem>
-                                        <SelectItem value="Soft Silk">Soft Silk</SelectItem>
-                                        <SelectItem value="Cotton">Cotton</SelectItem>
-                                        <SelectItem value="Fancy">Fancy</SelectItem>
+                                        <SelectItem value="Gold">Gold</SelectItem>
+                                        <SelectItem value="Diamond">Diamond</SelectItem>
+                                        <SelectItem value="Silver">Silver</SelectItem>
+                                        <SelectItem value="Stone">Stone</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>

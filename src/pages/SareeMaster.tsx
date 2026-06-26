@@ -202,7 +202,7 @@ export const SareeMaster: React.FC = () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'saree_import_template.csv';
+    a.download = 'jewel_import_template.csv';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -308,7 +308,7 @@ export const SareeMaster: React.FC = () => {
         if (newSarees.length > 0) {
           // Bulk add
           newSarees.forEach(s => addSaree(s));
-          toast.success(`Imported ${newSarees.length} sarees successfully`);
+          toast.success(`Imported ${newSarees.length} jewels successfully`);
           setIsImportDialogOpen(false);
         } else {
           toast.error('No valid data found in file');
@@ -612,9 +612,9 @@ export const SareeMaster: React.FC = () => {
           <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle>Import Sarees</DialogTitle>
+                <DialogTitle>Import Jewels</DialogTitle>
                 <DialogDescription>
-                  Upload a CSV file to import saree data. Please use the template format.
+                  Upload a CSV file to import jewel data. Please use the template format.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
@@ -639,16 +639,15 @@ export const SareeMaster: React.FC = () => {
             </Button>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-background">
               <DialogHeader>
-                <DialogTitle className="font-display text-xl">{isEditing ? 'Edit Saree' : 'Add New Saree'}</DialogTitle>
+                <DialogTitle className="font-display text-xl">{isEditing ? 'Edit Jewel' : 'Add New Jewel'}</DialogTitle>
                 <DialogDescription>
-                  Enter complete details of the saree product
+                  Enter complete details of the jewel product
                 </DialogDescription>
               </DialogHeader>
 
               <Tabs defaultValue="basic" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="basic">Basic Info</TabsTrigger>
-                  {(formData.department === 'Saree' || !formData.department) && <TabsTrigger value="attributes">Saree Attributes</TabsTrigger>}
                   <TabsTrigger value="pricing">Pricing</TabsTrigger>
                   <TabsTrigger value="images">Images</TabsTrigger>
                 </TabsList>
@@ -763,177 +762,6 @@ export const SareeMaster: React.FC = () => {
                       placeholder="Detailed description of the jewelry piece..."
                       rows={3}
                     />
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="attributes" className="space-y-4 mt-4">
-                  {/* Material & Zari */}
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>Material</Label>
-                      <Select
-                        value={formData.material}
-                        onValueChange={(v) => setFormData({ ...formData, material: v })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-popover">
-                          {materials.map((mat) => (
-                            <SelectItem key={mat.value} value={mat.value}>
-                              {mat.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Zari Type</Label>
-                      <Select
-                        value={formData.zariType}
-                        onValueChange={(v) => setFormData({ ...formData, zariType: v })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-popover">
-                          {zariTypes.map((zari) => (
-                            <SelectItem key={zari.value} value={zari.value}>
-                              {zari.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {/* Border & Design */}
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>Border Type</Label>
-                      <Select
-                        value={formData.borderType}
-                        onValueChange={(v) => setFormData({ ...formData, borderType: v })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-popover">
-                          {borderTypes.map((border) => (
-                            <SelectItem key={border.value} value={border.value}>
-                              {border.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Design Type</Label>
-                      <Select
-                        value={formData.designType}
-                        onValueChange={(v) => setFormData({ ...formData, designType: v })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-popover">
-                          {designTypes.map((design) => (
-                            <SelectItem key={design.value} value={design.value}>
-                              {design.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {/* Color */}
-                  <div className="space-y-2">
-                    <Label>Color</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {colors.map((color) => (
-                        <button
-                          key={color.value}
-                          type="button"
-                          onClick={() => setFormData({ ...formData, color: color.value })}
-                          className={`flex items-center gap-2 rounded-lg border px-3 py-2 transition-all ${formData.color === color.value
-                            ? 'border-primary bg-primary/10'
-                            : 'border-border hover:border-primary/50'
-                            }`}
-                        >
-                          <div
-                            className="h-4 w-4 rounded-full border"
-                            style={{ backgroundColor: color.hex }}
-                          />
-                          <span className="text-sm">{color.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Length & Weight */}
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label>Length</Label>
-                      <Select
-                        value={formData.length}
-                        onValueChange={(v) => setFormData({ ...formData, length: v })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-popover">
-                          <SelectItem value="5.5 meters">5.5 meters</SelectItem>
-                          <SelectItem value="6.0 meters">6.0 meters</SelectItem>
-                          <SelectItem value="6.3 meters">6.3 meters (Standard)</SelectItem>
-                          <SelectItem value="6.5 meters">6.5 meters</SelectItem>
-                          <SelectItem value="9 meters">9 meters (Madisar)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Weight (grams)</Label>
-                      <Input
-                        type="number"
-                        value={formData.weight}
-                        onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                        placeholder="850"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Blouse */}
-                  <div className="rounded-lg border p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Certificate Included</p>
-                        <p className="text-sm text-muted-foreground">
-                          Does this jewelry item include a certificate?
-                        </p>
-                      </div>
-                      <Switch
-                        checked={formData.blouseIncluded}
-                        onCheckedChange={(v) => setFormData({ ...formData, blouseIncluded: v })}
-                      />
-                    </div>
-                    {formData.blouseIncluded && (
-                      <div className="mt-3">
-                        <Label>Blouse Piece Length</Label>
-                        <Select
-                          value={formData.blousePiece}
-                          onValueChange={(v) => setFormData({ ...formData, blousePiece: v })}
-                        >
-                          <SelectTrigger className="mt-1">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="bg-popover">
-                            <SelectItem value="0.8 meters">0.8 meters (Running)</SelectItem>
-                            <SelectItem value="1.0 meters">1.0 meter</SelectItem>
-                            <SelectItem value="attached">Attached Blouse</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
                   </div>
                 </TabsContent>
 

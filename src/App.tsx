@@ -26,7 +26,6 @@ import PurchaseEntry from "./pages/PurchaseEntry";
 import SupplierManagement from "./pages/SupplierManagement";
 import PurchaseReturn from "./pages/PurchaseReturn";
 import ReturnsExchange from "./pages/ReturnsExchange";
-import AlterationService from "./pages/AlterationService";
 import OrderBooking from "./pages/OrderBooking";
 import DueManagement from "./pages/DueManagement";
 import Expenses from "./pages/Expenses";
@@ -35,7 +34,6 @@ import Reports from "./pages/Reports";
 import GstReports from "./pages/GstReports";
 import WhatsappMessenger from "./pages/WhatsappMessenger";
 import Settings from "./pages/Settings";
-import AdminCustomization from "./pages/AdminCustomization";
 import BarcodeGenerator from "./pages/BarcodeGenerator";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
@@ -84,7 +82,6 @@ const AppRoutes = () => {
         <Route path="/suppliers" element={<SupplierManagement />} />
         <Route path="/purchase-return" element={<PurchaseReturn />} />
         <Route path="/returns" element={<ReturnsExchange />} />
-        <Route path="/alterations" element={<AlterationService />} />
         <Route path="/orders" element={<OrderBooking />} />
         <Route path="/expenses" element={<Expenses />} />
         <Route path="/staff" element={<StaffManagement />} />
@@ -92,7 +89,6 @@ const AppRoutes = () => {
         <Route path="/gst-reports" element={<GstReports />} />
         <Route path="/whatsapp" element={<WhatsappMessenger />} />
         <Route path="/settings" element={<Settings />} />
-        <Route path="/admin-customization" element={<AdminCustomization />} />
         <Route path="/barcode-generator" element={<BarcodeGenerator />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/backup" element={<BackupRestore />} />
